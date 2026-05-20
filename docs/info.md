@@ -18,3 +18,8 @@ Explain how to use your project
 ## External hardware
 
 List external hardware used in your project (e.g. PMOD, LED display, etc), if any
+Ethernet 100BASE-T Pmod connector, featuring: 
+- LAN8720A PHY 
+- 50MHz oscillator
+
+ASIC 50MHz clock is driven by a clk in phase with the 50MHz oscillator on the Ethernet Pmod
