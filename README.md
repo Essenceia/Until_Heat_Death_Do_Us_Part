@@ -20,7 +20,7 @@ This ASIC will be supporting 100Mbps ethernet using the following assumptions:
 
 This MAC supports: 
 - jumbo frames upto 9000 bytes 
-- VLAN tagging
+- VLAN tagging (802.21Q) 
 
 The MAC will filter out all unicast packets not matching the configured
 destination MAC address. This implies that all broadcast and multicast 

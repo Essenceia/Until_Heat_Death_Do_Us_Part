@@ -18,10 +18,17 @@ localparam ADDR_CNT = (MAC_W / (8/PHY_W)) - 1;
 localparam ADDR_CNT_W = $clog2(ADDR_CNT); 
 
 localparam SFD_W = 8; 
-localparam [SFD_W-1:0] SFD = 8'bTODO; 
+localparam [SFD_W-1:0] SFD = 8'b10101011; 
+
+localparam FRAME_TYPE_W = 16;
+localparam FRAME_TYPE_CNT = (FRAME_TYPE_W / (8/PHY_W)) - 1;
+localparam FRAME_TYPE_CNT_W = $clog2(FRAME_TYPE_CNT);
+
+localparam [FRAME_TYPE_W-1:0] TYPE_VLAN = 16'h8100;
 
 // support jumbo frames upto 9000 bytes long
 localparam MAX_FRAME_BYTE_SIZE = 9000;
 localparam MAX_FRAME_SIZE = 9000 * (8/PHY_W);
 localparam FRAME_SIZE_W = $clog2(MAX_FRAME_SIZE);
+
 
