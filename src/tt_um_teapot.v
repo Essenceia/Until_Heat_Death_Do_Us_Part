@@ -83,17 +83,17 @@ rmii m_rmii(
 
 	.phy_rst_n_o(phy_rst_n),
 
-	.rx_v_dir_o(rx_v_io_dir),
-	.rx_dir_o(rx_io_dir),
-	.rx_v_o(rx_v_out),
-	.rx_o(rx_out),
+	.phy_rx_v_dir_o(rx_v_io_dir),
+	.phy_rx_dir_o(rx_io_dir),
+	.phy_rx_v_o(rx_v_out),
+	.phy_rx_o(rx_out),
 
-	.tx_en_o(),
-	.tx_o(),
+	.phy_tx_en_o(),
+	.phy_tx_o(),
 
-	.rx_v_i(rx_v_io_in),
-	.rx_i(rx_io_in),
-	.rx_err_i(rx_err_in),
+	.phy_rx_v_i(rx_v_io_in),
+	.phy_rx_i(rx_io_in),
+	.phy_rx_err_i(rx_err_in),
 
 	.mac_rx_v_o(),
 	.mac_rx_o(),

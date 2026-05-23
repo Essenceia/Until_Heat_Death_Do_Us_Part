@@ -16,17 +16,17 @@ module rmii(
 	input wire        clk_phase_sel_i,
 	// config
 	output wire       phy_rst_n_o, // latch config on rst release
-	output wire       rx_v_dir_o, // CRS_DV dir, 0=input, 1=output
-	output wire [1:0] rx_dir_o, // RX data dir, 0=input, 1=output
-	output wire       rx_v_o, // config, MODE2
-	output wire [1:0] rx_o, // config, MODE[1:0]
+	output wire       phy_rx_v_dir_o, // CRS_DV dir, 0=input, 1=output
+	output wire [1:0] phy_rx_dir_o, // RX data dir, 0=input, 1=output
+	output wire       phy_rx_v_o, // config, MODE2
+	output wire [1:0] phy_rx_o, // config, MODE[1:0]
 
-	output wire       tx_v_o, // transmit strobe
-	output wire [1:0] tx_o,	
+	output wire       phy_tx_v_o, // transmit strobe
+	output wire [1:0] phy_tx_o,	
 
-	input wire        rx_v_i, //async valid, carrier is none idle signal, packet will start on SRD	
-	input wire [1:0]  rx_i,
-	input wire        rx_err_i, // error, drop packet
+	input wire        phy_rx_v_i, //async valid, carrier is none idle signal, packet will start on SRD	
+	input wire [1:0]  phy_rx_i,
+	input wire        phy_rx_err_i, // error, drop packet
 
 	output wire       mac_rx_v_o,
 	output wire [1:0] mac_rx_o,
@@ -65,12 +65,12 @@ always @(posedge clk)
 
 always @(posedge clk) 
 	if (~rst_n) 
-		{rx_v_dir_o, rx_dir_o} <= {3{1'b1}};
+		{phy_rx_v_dir_o, phy_rx_dir_o} <= {3{1'b1}};
 	else if ( &(~rst_cnt_q) )
-		{rx_v_dir_o, rx_dir_o} <= {3{1'b0}};
+		{phy_rx_v_dir_o, phy_rx_dir_o} <= {3{1'b0}};
 
 // MODE
-assign {rx_v_o, rx_o} = CONF_MODE;
+assign {phy_rx_v_o, phy_rx_o} = CONF_MODE;
 
 // implictly already set by wiring : 
 // PHYADDR0 = 0 
@@ -95,8 +95,8 @@ tx_tt_buffer m_tx_delay(
 	.tx_v_i(mac_tx_v_q),
 	.tx_i(mac_tx_q),
 
-	.tx_v_o(tx_v_o),
-	.tx_o(tx_o)
+	.tx_v_o(phy_tx_v_o),
+	.tx_o(phy_tx_o)
 ); 
 
 // RX - pass though, flop for timing
@@ -110,9 +110,9 @@ always @(posedge clk) begin
 		mac_rx_err_q <= 1'b0;
 		mac_rx_q     <= 2'b00;
 	end else begin
-		mac_rx_v_q   <= rx_v_i;
-		mac_rx_err_q <= rx_err_i;
-		mac_rx_q     <= rx_i;
+		mac_rx_v_q   <= phy_rx_v_i;
+		mac_rx_err_q <= phy_rx_err_i;
+		mac_rx_q     <= phy_rx_i;
 	end
 end
 
