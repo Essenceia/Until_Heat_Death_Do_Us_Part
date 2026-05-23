@@ -55,14 +55,12 @@ mac_rx m_mac_rx(
 	.phy_mac_i(),
 	.vid_i(),
 
-	.mac_v_i(),
-	.mac_i(),
-	.mac_err_i(),
+	.rx_v_i(),
+	.rx_i(),
+	.rx_err_i(),
 
-	.data_v_o(),
-	.data_start_o(),
-	.data_o(),
-	.data_err_o()
+	.mcu_cmd_o(),
+	.mcu_o()
 );
 
 // rx rpi

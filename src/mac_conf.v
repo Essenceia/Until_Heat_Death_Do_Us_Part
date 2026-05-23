@@ -22,7 +22,7 @@ module mac_conf #(
 	localparam MAC_ADDR_W = 48,
 	parameter TX_CLK_DEPHASE = 1'b1, // 180 degrees dephase from ref_clk
 	parameter [VID_W-1:0]      VID = 12'hDAD,
-	parameter [MAC_ADDR_W-1:0] MAC_ADDR = 48'hB09CB200BEEF
+	parameter [MAC_ADDR_W-1:0] MAC_ADDR = 48'h0090CF00BEEF // nortel manifacturer
 )
 (
 	input clk, 

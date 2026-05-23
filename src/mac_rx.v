@@ -19,16 +19,19 @@ module mac_rx(
 	input [47:0] phy_mac_i, 
 	input [11:0] vid_i,// vlan id
  
-	input        mac_v_i, 
-	input [1:0]  mac_i, 
-	input        mac_err_i,
+	input        rx_v_i, 
+	input [1:0]  rx_i, 
+	input        rx_err_i,
 
-	output       data_v_o,
-	output       data_start_o,
-	output [1:0] data_o,
-	output       data_err_o // drop ongoing packet on error
+	output [1:0] mcu_cmd_o,
+	output [1:0] mcu_o
 ); 
 `include "src/eth_defines.vh"
+
+localparam RX_CMD_IDLE  = 2'b00;
+localparam RX_CMD_EARLY = 2'b01;
+localparam RX_CMD_DATA  = 2'b10;
+localparam RX_CMD_ERR   = 2'b11;
 
 // fsm 
 localparam ERR        = 4'd0; 
@@ -66,10 +69,10 @@ wire vid_match;
 wire [FCS_W-1:0] pkt_fcs;
 wire             fcs_match; 
 
-reg       data_v_q; 
-reg [1:0] data_q;
-reg       data_start_q; 
-reg       data_err_q; 
+reg       mcu_v_q; 
+reg [1:0] mcu_q;
+reg       mcu_start_q; 
+reg       mcu_err_q; 
 
 // fsm 
 always @(posedge clk) begin
@@ -77,25 +80,25 @@ always @(posedge clk) begin
 		fsm_q <= IDLE; 
 	else begin
 		// detect mac gap 
-		if (mac_v_i & mac_err_i) begin
+		if (rx_v_i & rx_err_i) begin
 			fsm_q <= ERR;
 		end else begin
 			case(fsm_q)
 				ERR:        fsm_q <= IDLE; 
-				IDLE:       fsm_q <= mac_v_i ? DETECT_SFD : IDLE;
+				IDLE:       fsm_q <= rx_v_i ? DETECT_SFD : IDLE;
 				DETECT_SFD: fsm_q <= frame_start ? DST_MAC: DETECT_SFD;
 				DST_MAC:    fsm_q <= cnt_q == ADDR_CNT ? SRC_MAC: DST_MAC; 
 				SRC_MAC:    fsm_q <= cnt_q == ADDR_CNT ? PKT_TYPE: SRC_MAC;
 				PKT_TYPE:   fsm_q <= cnt_q == FRAME_TYPE_CNT ? (type_vlan? VLAN: BODY):PKT_TYPE;
 				VLAN:       fsm_q <= cnt_q == FRAME_TYPE_CNT ? BODY: VLAN; 
-				BODY:       fsm_q <= mac_v_i ? BODY: FCS; 
+				BODY:       fsm_q <= rx_v_i ? BODY: FCS; 
 				FCS:        fsm_q <= IDLE;  
 			endcase	
 		end
 	end
 end
 // stream from PHY is expected to be gappless
-assign buff = {buff_q[BUF_W-5:2], mac_i};
+assign buff = {buff_q[BUF_W-5:2], rx_i};
 
 always @(posedge clk) 
 	if (~rst_n) 
@@ -137,13 +140,13 @@ always @(posedge clk)
 	if (fsm_q == IDLE) 
 		err_q <= 1'b0; // IFG guaranties no back to back frames
 	else 
-		err_q <=  err_q | (mac_v_i & mac_err_i) | pkt_fcs; 
+		err_q <=  err_q | (rx_v_i & rx_err_i) | pkt_fcs; 
 
 // FCS 
 crc m_fcs(
 	.clk(clk),
 	.rst_n(rst_n),
-	.data_in(mac_i),
+	.data_in(rx_i),
 	.crc_en(1'b1),
 	.crc_out(pkt_fcs)
 );
@@ -151,24 +154,28 @@ assign fcs_match = ~|pkt_fcs;
 
 // data buffer, excluding the FCS without keeping track of
 // the data width for portability
-wire [DELAY_DEPTH-1:0] delay_data_v_q; 
-wire [DELAY_DEPTH-1:0] delay_data_start_q; 
+wire [DELAY_DEPTH-1:0] delay_mcu_v_q; 
+wire [DELAY_DEPTH-1:0] delay_mcu_start_q; 
 
 always @(posedge clk)
 	if (~rst_n)
-		delay_data_v_q <= {DELAY_DEPTH{1'b0}};
+		delay_mcu_v_q <= {DELAY_DEPTH{1'b0}};
 	else
-		delay_data_v_q <= {delay_data_v_q[DELAY_DEPTH-2:0], fsm_q == BODY & fwd_q};
+		delay_mcu_v_q <= {delay_mcu_v_q[DELAY_DEPTH-2:0], fsm_q == BODY & fwd_q};
 
 always @(posedge clk) begin
 	body_start_q       <= body_start_next; 
-	delay_data_start_q <= {delay_data_start_q[DELAY_DEPTH-2:0], body_start_q};	
+	delay_mcu_start_q <= {delay_mcu_start_q[DELAY_DEPTH-2:0], body_start_q};	
 end
 
-// To higher level
-assign data_v_o     = delay_data_v_q[DELAY_DEPTH-1];
-assign data_start_o = delay_data_start_q[DELAY_DEPTH-1];
-assign data_err_o   = err_q; // async sticky error
-assign data_o       = buff_q[FCS_W+1:FCS_W];
+// To mcu, cmd :
+// 00 - idle
+// 01 - early
+// 10 - valid
+// 11 - error
+
+assign mcu_cmd_o[0]  = err_q | delay_mcu_start_q[DELAY_DEPTH-2]; 
+assign mcu_cmd_o[1]    = delay_mcu_v_q[DELAY_DEPTH-1];
+assign mcu_o         = buff_q[FCS_W+1:FCS_W];
 
 endmodule
