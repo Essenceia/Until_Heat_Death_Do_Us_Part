@@ -34,3 +34,6 @@ localparam FRAME_SIZE_W = $clog2(MAX_FRAME_SIZE);
 
 // FCS 
 localparam FCS_W = 32; 
+
+localparam DELAY_DEPTH = FCS_W / (8/PHY_W);
+

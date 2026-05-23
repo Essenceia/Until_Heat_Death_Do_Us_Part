@@ -8,8 +8,9 @@ granted to use it to train any model.
 `default_nettype none
 
 /* 
-Parsing mac headers, will filter out all packets that 
-are not IPv4/6 to be handeled by the CPU 
+RX MAC layer. Will filter out all unicast packets not meant for
+this device and will forward starting from the payload and excluding
+the FCS. 
 */ 
 module mac_rx(
 	input clk, 
@@ -30,24 +31,25 @@ module mac_rx(
 `include eth_defines.vh
 
 // fsm 
-localparam ERR        = 3'd0; 
-localparam IDLE       = 3'd0; // TODO fsm codes 
-localparam DETECT_SFD = 3'd1;
-localparam DST_MAC    = 3'd2;
-localparam SRC_MAC    = 3'd2;
-localparam PKT_TYPE   = 3'd2;
-localparam VLAN       = 3'd2;
-localparam BODY       = 3'd3; 
-localparam FCS        = 3'd4;
+localparam ERR        = 4'd0; 
+localparam IDLE       = 4'd1; 
+localparam DETECT_SFD = 4'd2;
+localparam DST_MAC    = 4'd3;
+localparam SRC_MAC    = 4'd4;
+localparam PKT_TYPE   = 4'd5;
+localparam VLAN       = 4'd6;
+localparam BODY       = 4'd7; 
+localparam FCS        = 4'd8;
  
-reg [2:0] fsm_q;
+reg [3:0] fsm_q;
 
 reg err_q; 
 reg fwd_q; // forward packet to higher level, not filted out
 
 localparam BUF_W = $max(MAC_W,SFD_W,FCS_W);
 
-reg [BUF_W-1:0] buff_q;
+reg  [BUF_W-3:0] buff_q;
+wire [BUF_W-1:0] buff;
 wire frame_start;
 
 localparam CNT_W = $mac(ADDR_CNT_W, FRAME_TYPE_CNT);
@@ -57,13 +59,15 @@ wire dst_addr_match;
 wire dst_addr_group; 
 
 wire type_vlan; 
-wire vid_match;  
+wire vid_match;
+  
+wire [FCS_W-1:0] pkt_fcs;
+wire             fcs_match; 
 
 reg       data_v_q; 
 reg [1:0] data_q;
 reg       data_start_q; 
 reg       data_err_q; 
-
 
 // fsm 
 always @(posedge clk) begin
@@ -89,14 +93,16 @@ always @(posedge clk) begin
 	end
 end
 // stream from PHY is expected to be gappless
+assign buff = {buff_q[BUF_W-5:2], mac_i};
+
 always @(posedge clk) 
 	if (~rst_n) 
-		buff_q <= {BUF_W{1'b0}};
-	else if (mac_v_i)
-		buff_q <= {buff_q[BUF_W-3:2], mac_i};
-
+		buff_q <= {BUF_W-2{1'b0}};
+	else
+		buff_q <= buff;
+ 
 // detect SFD
-assign frame_start = buff_q[SFD_W-1:0] == SFD; 
+assign frame_start = buff[SFD_W-1:0] == SFD; 
 
 
 // filter out packets that don't match our MAC address (or multicast)
@@ -106,14 +112,14 @@ always @(posedge clk)
 	else
 		cnt_q <= cnt_q + {{ADDR_CNT_W-1{1'b0}}, 1'b1};
 
-assign dst_addr_match = phy_mac_i == buff_q;
+assign dst_addr_match = phy_mac_i == buff;
 // forwarding all broadcast and multicast packets
 // 0 - Unicast Address
 // 1 - Multicast/Broadcast Address
-assign dst_addr_group = buff_q[MAC_W-8];  
+assign dst_addr_group = buff[MAC_W-8];  
 
-assign type_vlan = buff_q[FRAME_TYPE_W-1:0] == TYPE_VLAN; 
-assign vid_match = buff_q[VID_W-1:0] == vid_i;
+assign type_vlan = buff[FRAME_TYPE_W-1:0] == TYPE_VLAN; 
+assign vid_match = buff[VID_W-1:0] == vid_i;
 
 // forward 
 always @(posedge clk) 
@@ -129,14 +135,34 @@ always @(posedge clk)
 	else 
 		err_q <=  err_q | (mac_v_i & mac_err_i) | fcs_err; 
 
-// TODO FCS 
+// FCS 
+crc m_fcs(
+	.clk(clk),
+	.rst_n(rst_n),
+	.data_in(mac_i),
+	.crc_en(1'b1),
+	.crc_out(pkt_fcs)
+);
+assign fcs_match = ~|pkt_fcs;
 
-// to higher level
-always @(posedge clk) begin
-	data_v_q     <= fsm_q == BODY & fwd_q; // TODO sync
-	data_start_q <= body_start_q;// TODO sync
-	data_err_q   <= err_q; // async error
-	data_q       <= buff_q[FCS_W+1:FCS_W];
-end
+// data buffer, excluding the FCS without keeping track of
+// the data width for portability
+wire [DELAY_DEPTH-1:0] delay_data_v_q; 
+wire [DELAY_DEPTH-1:0] delay_data_start_q; 
+
+always @(posedge clk)
+	if (~rst_n)
+		delay_data_v_q <= {DELAY_DEPTH{1'b0}};
+	else
+		delay_data_v_q <= {delay_data_v_q[DELAY_DEPTH-2:0], fsm_q == BODY & fwd_q};
+
+always @(posedge clk)
+	delay_data_start_q <= body_start_q;	
+
+// To higher level
+assign data_v_o     = delay_data_v_q[DELAY_DEPTH-1];
+assign data_start_o = delay_data_start_q[DELAY_DEPTH-1];
+assign data_err_o   = err_q; // async sticky error
+assign data_o       = buff_q[FCS_W+1:FCS_W];
 
 endmodule

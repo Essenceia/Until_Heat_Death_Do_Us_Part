@@ -19,25 +19,57 @@ module tt_um_teapot (
     input  wire       rst_n     // reset_n - low to reset
 );
 
-  // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-  assign uio_out = 0;
-  assign uio_oe  = 0;
-
-  // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
-
-
 // rmii 
+rmii m_rmii(
+	.clk(clk),
+	.rst_n(rst_n),
 
-// tx 
+	.phy_rst_n_o(),
+	.rx_v_dir_o(),
+	.rx_dir_o(),
+	.rx_v_o(),
+	.rx_o(),
 
-// mac 
+	.tx_en_o(),
+	.tx_o(),
 
-// arp ? 
+	.rx_v_i(),
+	.rx_i(),
+	.rx_err_i(),
 
-// ip 
+	.mac_rx_v_o(),
+	.mac_rx_o(),
+	.mac_rx_err_o(),
 
-// udp
- 
+	.mac_tx_v_i(),
+	.mac_tx_i()
+);
+
+// mac config 
+
+// rx mac 
+mac_rx m_mac_rx(
+	.clk(clk),
+	.rst_n(rst_n),
+
+	.phy_mac_i(),
+	.vid_i(),
+
+	.mac_v_i(),
+	.mac_i(),
+	.mac_err_i(),
+
+	.data_v_o(),
+	.data_start_o(),
+	.data_o(),
+	.data_err_o()
+);
+
+// rx rpi
+
+// tx mac
+
+// tx rpi
+
+
 endmodule

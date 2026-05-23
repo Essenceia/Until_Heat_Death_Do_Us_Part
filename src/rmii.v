@@ -15,7 +15,7 @@ module rmii(
 
 	input wire        clk_phase_sel,
 	// config
-	output wire       phy_rst_n, // latch config on rst release
+	output wire       phy_rst_n_o, // latch config on rst release
 	output wire       rx_v_dir_o, // CRS_DV dir, 0=input, 1=output
 	output wire [1:0] rx_dir_o, // RX data dir, 0=input, 1=output
 	output wire       rx_v_o, // config, MODE2
@@ -57,9 +57,9 @@ always @(posedge clk)
 
 always @(posedge clk) 
 	if (~rst_n)
-		phy_rst_n <= 1'b0;
+		phy_rst_n_o <= 1'b0;
 	if ( rst_cnt_q == RST_RELEASE_CNT ) 
-		phy_rst_n <= 1'b0;
+		phy_rst_n_o <= 1'b0;
 
 always @(posedge clk) 
 	if (~rst_n) 
@@ -94,9 +94,25 @@ tx_tt_buffer m_tx_delay(
 	.tx_o(tx_o)
 ); 
 
-// RX - pass though
-assign mac_rx_v_o   = rx_v_i; // will fix async valid in mac
-assign mac_rx_o     = rx_i; 
-assign mac_rx_err_o = rx_err_i;
+// RX - pass though, flop for timing
+reg       mac_rx_v_q;
+reg       mac_rx_err_q;
+reg [1:0] mac_rx_q;
+
+always @(posedge clk) begin
+	if (~rst_n) begin
+		mac_rx_v_q   <= 1'b0;
+		mac_rx_err_q <= 1'b0;
+		mac_rx_q     <= 2'b00;
+	end else begin
+		mac_rx_v_q   <= rx_v_i;
+		mac_rx_err_q <= rx_err_i;
+		mac_rx_q     <= rx_i;
+	end
+end
+
+assign mac_rx_v_o   = mac_rx_v_q; // will fix async valid in mac
+assign mac_rx_o     = mac_rx_q; 
+assign mac_rx_err_o = mac_rx_err_q;
 
 endmodule
