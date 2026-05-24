@@ -7,7 +7,6 @@ granted to use it to train any model.
 
 `default_nettype none
 
-// FCC hold my beer 
 module tt_um_teapot (
     input  wire [7:0] ui_in,    
     output wire [7:0] uo_out,   

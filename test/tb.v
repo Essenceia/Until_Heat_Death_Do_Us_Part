@@ -1,49 +1,60 @@
-`default_nettype none
-`timescale 1ns / 1ps
+/*
+Copyright (c) 2026 Julia Desmazes 
 
-/* This testbench just instantiates the module and makes some convenient wires
-   that can be driven / tested by the cocotb test.py.
+This code was written by a human, authorization is explicitly not 
+granted to use it to train any model. 
 */
+
+`default_nettype none
+`timescale 1ns / 10ps
+
 module tb ();
 
-  // Dump the signals to a FST file. You can view it with gtkwave or surfer.
-  initial begin
-    $dumpfile("tb.fst");
-    $dumpvars(0, tb);
-    #1;
-  end
+	initial begin
+		$dumpfile("tb.vcd");
+		$dumpvars(0, tb);
+		#1;
+	end
 
-  // Wire up the inputs and outputs:
-  reg clk;
-  reg rst_n;
-  reg ena;
-  reg [7:0] ui_in;
-  reg [7:0] uio_in;
-  wire [7:0] uo_out;
-  wire [7:0] uio_out;
-  wire [7:0] uio_oe;
-`ifdef GL_TEST
-  wire VPWR = 1'b1;
-  wire VGND = 1'b0;
-`endif
+	// Wire up the inputs and outputs:
+	reg clk;
+	reg rst_n;
+	reg ena;
+	
+	reg [7:0]  ui_in;
+	reg [7:0]  uio_in;
+	wire [7:0] uo_out;
+	wire [7:0] uio_out;
+	wire [7:0] uio_oe;
 
-  // Replace tt_um_example with your module name:
-  tt_um_example user_project (
+ 	wire tck; 
+	wire tms; 
+	wire tdi; 
+	wire tdo; 
 
-      // Include power ports for the Gate Level test:
-`ifdef GL_TEST
-      .VPWR(VPWR),
-      .VGND(VGND),
-`endif
+	// RX path
+	wire [1:0] phy_rx;
+	wire       phy_rx_v;
+	wire       phy_rx_err;
+	wire [1:0] mcu_rx;
+	wire [1:0] mcu_rx_cmd;
 
-      .ui_in  (ui_in),    // Dedicated inputs
-      .uo_out (uo_out),   // Dedicated outputs
-      .uio_in (uio_in),   // IOs: Input path
-      .uio_out(uio_out),  // IOs: Output path
-      .uio_oe (uio_oe),   // IOs: Enable path (active high: 0=input, 1=output)
-      .ena    (ena),      // enable - goes high when design is selected
-      .clk    (clk),      // clock
-      .rst_n  (rst_n)     // not reset
-  );
+	assign uio_in[3:0] = {phy_rx_err, phy_rx_v, phy_rx};
+	assign mcu_rx      = uo_out[5:4];
+	assign mcu_rx_cmd  = uo_out[7:6];
+
+	assign ui_in[2:0] = {tdi, tms, tck};
+	assign tdo        = uo_out[3];
+
+	tt_um_teapot m_dut (
+		  .ui_in  (ui_in),    // Dedicated inputs
+		  .uo_out (uo_out),   // Dedicated outputs
+		  .uio_in (uio_in),   // IOs: Input path
+		  .uio_out(uio_out),  // IOs: Output path
+		  .uio_oe (uio_oe),   // IOs: Enable path (active high: 0=input, 1=output)
+		  .ena    (ena),      // enable - goes high when design is selected
+		  .clk    (clk),      // clock
+		  .rst_n  (rst_n)     // not reset
+	);
 
 endmodule

@@ -1,40 +1,67 @@
-# SPDX-FileCopyrightText: © 2024 Tiny Tapeout
-# SPDX-License-Identifier: Apache-2.0
+# Cocotb testbench for testing the MAC and JTAG functions of this ASIC design
+#
+# Julia Desmazes, 2026, human made code
+
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles
+from cocotb.triggers import FallingEdge, RisingEdge, ClockCycles, with_timeout
 
+import random 
+import asyncio
+from array import array 
 
+import os
+if "GATES" in os.environ:
+	GATES = os.environ["GATES"].lower().strip()
+else:
+	GATES = ""
+
+CLK_UNIT="ns"
+CLK_PERIOD=20
+TCK_UNIT=CLK_UNIT 
+TCK_PERIOD=77
+CLK_TIMEOUT_PERIOD=(CLK_PERIOD*1000)
+
+SC_CLK_DELAY=2
+
+def start_clk(dut):
+	clock = Clock(dut.clk, CLK_PERIOD, CLK_UNIT)
+	clk_task = cocotb.start_soon(clock.start()) #runs the clock "in the background" 
+	return clk_task
+
+def start_jtag_clk(dut):
+	jtag_clk = Clock(dut.tck, TCK_PERIOD, TCK_UNIT)
+	cocotb.start_soon(jtag_clk.start())
+
+# Reset sequence
+async def rst(dut, ena=1, start_jtag=False, start_main_clk=True):
+	dut.rst_n.value = 1
+	dut.tck.value = 0
+	dut.tms.value = "X"
+	dut.tdi.value = "X"
+	clk_task = start_clk(dut)
+	if start_jtag:
+		dut.tms.value = 0
+		dut.tdi.value = 0
+		start_jtag_clk(dut)
+	await ClockCycles(dut.clk, 2)
+	dut.rst_n.value = 0
+	await ClockCycles(dut.clk, 2)
+	# set default phy rx
+	dut.phy_rx_v.value = "0"
+	dut.phy_rx.value = "X"*2
+	dut.phy_rx_err.value = "X"
+	dut.ena.value = 0
+	await ClockCycles(dut.clk, 10)
+	dut.rst_n.value = 1
+	dut.ena.value = ena
+	await ClockCycles(dut.clk, 20)
+	if not(start_main_clk): 
+		assert(clk_task.cancel())
+
+# Simple test 
 @cocotb.test()
-async def test_project(dut):
-    dut._log.info("Start")
-
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, unit="us")
-    cocotb.start_soon(clock.start())
-
-    # Reset
-    dut._log.info("Reset")
-    dut.ena.value = 1
-    dut.ui_in.value = 0
-    dut.uio_in.value = 0
-    dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 10)
-    dut.rst_n.value = 1
-
-    dut._log.info("Test project behavior")
-
-    # Set the input values you want to test
-    dut.ui_in.value = 20
-    dut.uio_in.value = 30
-
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
-
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 50
-
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+async def simple_rx_test(dut):
+	await rst(dut) 
+	await ClockCycles(dut.clk, 30)
