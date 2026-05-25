@@ -62,7 +62,7 @@ always @(posedge clk)
 	if (~rst_n)
 		phy_rst_n_q <= 1'b0;
 	else if ( rst_cnt_q == RST_RELEASE_CNT ) 
-		phy_rst_n_q <= 1'b0;
+		phy_rst_n_q <= 1'b1;
 assign phy_rst_n_o = phy_rst_n_q;
 
 reg       phy_rx_v_dir_q;
