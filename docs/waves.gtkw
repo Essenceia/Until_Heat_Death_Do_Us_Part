@@ -1,0 +1,43 @@
+[*]
+[*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
+[*] Mon May 25 18:50:12 2026
+[*]
+[dumpfile] "/home/pitchu/asic/teapot/test/tb.vcd"
+[dumpfile_mtime] "Mon May 25 18:49:02 2026"
+[dumpfile_size] 132461
+[savefile] "/home/pitchu/asic/teapot/docs/waves.gtkw"
+[timestart] 0
+[size] 1910 470
+[pos] -1 -1
+*-23.000000 12380000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[treeopen] tb.m_dut.
+[sst_width] 290
+[signals_width] 266
+[sst_expanded] 1
+[sst_vpaned_height] 137
+@200
+-rmii
+@28
+tb.m_dut.m_rmii.clk
+tb.m_dut.m_rmii.rst_n
+tb.m_dut.m_rmii.phy_rx_v_i
+tb.m_dut.m_rmii.phy_rx_err_i
+tb.m_dut.m_rmii.phy_rx_i[1:0]
+@200
+-conf
+@28
+tb.m_dut.m_rmii.phy_rx_dir_o[1:0]
+tb.m_dut.m_rmii.phy_rx_v_dir_o
+tb.m_dut.m_rmii.phy_rx_o[1:0]
+tb.m_dut.m_rmii.phy_rx_v_o
+tb.m_dut.m_rmii.phy_rst_n_o
+@200
+-rx
+@29
+tb.m_dut.m_mac_rx.rx_err_i
+@28
+tb.m_dut.m_mac_rx.rx_i[1:0]
+tb.m_dut.m_mac_rx.rx_v_i
+[pattern_trace] 1
+[pattern_trace] 0

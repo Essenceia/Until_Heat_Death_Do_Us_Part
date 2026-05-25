@@ -30,7 +30,7 @@ module mac_rx(
 localparam PHY_W = 2; 
 
 localparam MAC_W        = 48;
-localparam ADDR_CNT_VAL = (MAC_W / (8/PHY_W)) - 1;
+localparam ADDR_CNT_VAL = (MAC_W/PHY_W) - 1;
 localparam ADDR_CNT_W   = $clog2(ADDR_CNT_VAL); 
 /* verilator lint_off WIDTHTRUNC */
 localparam [ADDR_CNT_W-1:0] ADDR_CNT = ADDR_CNT_VAL;
@@ -40,7 +40,7 @@ localparam SFD_W = 8;
 localparam [SFD_W-1:0] SFD = 8'b10101011; 
 
 localparam FRAME_TYPE_W       = 16;
-localparam FRAME_TYPE_CNT_VAL = (FRAME_TYPE_W / (8/PHY_W)) - 1;
+localparam FRAME_TYPE_CNT_VAL = (FRAME_TYPE_W/PHY_W) - 1;
 localparam FRAME_TYPE_CNT_W   = $clog2(FRAME_TYPE_CNT_VAL);
 /* verilator lint_off WIDTHTRUNC */
 localparam [FRAME_TYPE_CNT_W-1:0] FRAME_TYPE_CNT = FRAME_TYPE_CNT_VAL;
@@ -52,7 +52,7 @@ localparam VID_W = 12;
 // FCS 
 localparam FCS_W = 32; 
 
-localparam DELAY_DEPTH = FCS_W / (8/PHY_W);
+localparam DELAY_DEPTH = (FCS_W /PHY_W) + 1;
 
 // fsm 
 localparam ERR        = 4'd0; 
@@ -63,7 +63,6 @@ localparam SRC_MAC    = 4'd4;
 localparam PKT_TYPE   = 4'd5;
 localparam VLAN       = 4'd6;
 localparam BODY       = 4'd7; 
-localparam FCS        = 4'd8;
  
 reg [3:0] fsm_q;
 
@@ -80,6 +79,7 @@ localparam CNT_W = ADDR_CNT_W; // $max(ADDR_CNT_W, FRAME_TYPE_CNT);
 reg  [CNT_W-1:0] cnt_q; // shared counter 
 
 wire dst_addr_match; 
+wire dst_addr_broadcat; 
 wire dst_addr_group; 
 
 wire body_start_next;
@@ -91,6 +91,8 @@ wire [FCS_W-1:0] pkt_fcs;
 wire             fcs_err; 
 
 // fsm 
+wire eof; 
+
 always @(posedge clk) begin
 	if (~rst_n) 
 		fsm_q <= IDLE; 
@@ -107,15 +109,17 @@ always @(posedge clk) begin
 				SRC_MAC:    fsm_q <= cnt_q[ADDR_CNT_W-1:0] == ADDR_CNT ? PKT_TYPE: SRC_MAC;
 				PKT_TYPE:   fsm_q <= cnt_q[FRAME_TYPE_CNT_W-1:0] == FRAME_TYPE_CNT ? (type_vlan? VLAN: BODY):PKT_TYPE;
 				VLAN:       fsm_q <= cnt_q[FRAME_TYPE_CNT_W-1:0] == FRAME_TYPE_CNT ? BODY: VLAN; 
-				BODY:       fsm_q <= rx_v_i ? BODY: FCS; 
-				FCS:        fsm_q <= IDLE; 
+				BODY:       fsm_q <= rx_v_i ? BODY: IDLE; 
 				default:    fsm_q <= IDLE; 
 			endcase	
 		end
 	end
 end
+
+assign eof = (fsm_q == BODY) & ~ rx_v_i;
+
 // stream from PHY is expected to be gappless
-assign buff = {buff_q[BUF_W-3:0], rx_i};
+assign buff = {buff_q[BUF_W-PHY_W-1:0], rx_i};
 
 always @(posedge clk) 
 	if (~rst_n) 
@@ -169,7 +173,7 @@ crc m_fcs(
 	.crc_en(fsm_q != DETECT_SFD),
 	.crc_out(pkt_fcs)
 );
-assign fcs_err = fsm_q == FCS & ~|pkt_fcs;// end of packet, check fcs
+assign fcs_err = eof & ~|pkt_fcs;// end of packet, check fcs
 
 // data buffer, excluding the FCS without keeping track of
 // the data width for portability
@@ -177,14 +181,13 @@ reg [DELAY_DEPTH-1:0] delay_mcu_v_q;
 reg [DELAY_DEPTH-1:0] delay_mcu_start_q; 
 
 always @(posedge clk)
-	if (~rst_n)
+	if (~rst_n | eof)
 		delay_mcu_v_q <= {DELAY_DEPTH{1'b0}};
 	else
 		delay_mcu_v_q <= {delay_mcu_v_q[DELAY_DEPTH-2:0], fsm_q == BODY & fwd_q};
 
 always @(posedge clk) begin
-	body_start_q       <= body_start_next; 
-	delay_mcu_start_q <= {delay_mcu_start_q[DELAY_DEPTH-2:0], body_start_q};	
+	delay_mcu_start_q <= {delay_mcu_start_q[DELAY_DEPTH-2:0], body_start_next & fwd_q};	
 end
 
 // To mcu, cmd :
@@ -192,7 +195,7 @@ end
 // 01 - early
 // 10 - valid
 // 11 - error
-assign mcu_cmd_o[0]  = err_q | delay_mcu_start_q[DELAY_DEPTH-2]; 
+assign mcu_cmd_o[0]  = err_q | delay_mcu_start_q[DELAY_DEPTH-1]; 
 assign mcu_cmd_o[1]  = delay_mcu_v_q[DELAY_DEPTH-1];
 assign mcu_o         = buff_q[FCS_W+1:FCS_W];
 

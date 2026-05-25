@@ -45,8 +45,10 @@ module tb ();
 	assign mcu_rx      = uo_out[5:4];
 	assign mcu_rx_cmd  = uo_out[7:6];
 
-	assign ui_in[2:0] = {tdi, tms, tck};
-	assign tdo        = uo_out[3];
+	assign ui_in[0] = tck;
+	assign ui_in[1] = tms;
+	assign ui_in[2] = tdi;
+	assign tdo      = uo_out[3];
 
 	tt_um_teapot m_dut (
 		  .ui_in  (ui_in),    // Dedicated inputs
