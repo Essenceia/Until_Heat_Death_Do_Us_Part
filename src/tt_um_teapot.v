@@ -31,9 +31,6 @@ wire [11:0] vid;
 wire [47:0] mac_addr;
 wire        clk_phase_sel;
 
-wire [1:0] mcu_tx_cmd;
-wire [1:0] mcu_tx;
-
 wire        data_rx_v;
 wire        data_rx_conf;
 wire        data_rx_start;
@@ -59,6 +56,7 @@ wire       phy_rx_err_in;
 wire       phy_rst_n;
 
 // IO
+wire [3:0] uio_in_unused;
 assign uio_oe[2:0]  = {phy_rx_v_io_dir, phy_rx_io_dir};
 assign uio_out[2:0] = {phy_rx_v_io_out, phy_rx_io_out};
 assign {phy_rx_v_io_in, phy_rx_io_in[1:0]} = uio_in[2:0];
@@ -66,31 +64,33 @@ assign {phy_rx_v_io_in, phy_rx_io_in[1:0]} = uio_in[2:0];
 assign uio_oe[3]   = 1'b0;
 assign phy_rx_err_in   = uio_in[3];
 
+assign uio_oe[6:4]  = 3'd0;
+assign uio_out[6:3] = 4'd0;
+assign uio_in_unused = uio_in[7:4];
+
 assign uio_oe[7]   = 1'b1;
 assign uio_out[7]  = phy_rst_n;
 
-// IO - unsued
-assign uio_oe[6:4]  = 3'd0;
-assign uio_out[6:3] = 4'd0;
-wire [3:0] uio_in_unused;
-assign uio_in_unused = uio_in[7:4];
-
 // IN
-wire [3:0] in_unused; 
-assign in_unused = ui_in[3:0];
+wire tck, tms, tdi; 
+wire [6:3] ui_unused;
+wire default_tx_phase; 
 
-assign mcu_tx     = ui_in[5:4];
-assign mcu_tx_cmd = ui_in[7:6];
+assign tck = ui_in[0];
+assign tms = ui_in[1];
+assign tdi = ui_in[2];
+assign ui_unused = ui_in[6:3];
+assign default_tx_phase = ui_in[7]; 
 
 // OUT 
 wire [1:0] phy_tx;
 wire       phy_tx_v;
+wire       tdo; 
 
 assign uo_out[1:0] = phy_tx;
 assign uo_out[2]   = phy_tx_v;
-assign uo_out[3]   = 1'b0;
-assign uo_out[5:4] = mcu_rx;
-assign uo_out[7:6] = mcu_rx_cmd;
+assign uo_out[3]   = tdo;
+assign uo_out[7:4] = 4'd0;
 
 // misc
 wire ena_unused; 
@@ -145,7 +145,7 @@ mac_rx #(
 	.data_start_o(data_rx_start),
 	.data_err_o(data_rx_err),
 	.data_o(data_rx),
-	.data_src_mac_o(data_src_mac)
+	.data_src_mac_o(data_rx_src_mac)
 );
 
 //application
@@ -168,13 +168,14 @@ app_wrapper m_app_wrapper(
 
 // playpen config
 mac_conf #(
-	.DEFAULT_TX_CLK_PHASE(DEFAULT_TX_CLK_PHASE),
 	.DEFAULT_VID(DEFAULT_VID),
 	.DEFAULT_MAC(DEFAULT_MAC)
 )m_mac_conf(
 	.clk(clk),
 	.rst_n(rst_n),
 
+	.default_tx_phase_i(ui_in[7]),
+	
 	.data_v_i    (data_rx_v),
 	.data_conf_i (data_rx_conf),
 	.data_start_i(data_rx_start),

@@ -58,8 +58,8 @@ always @(posedge clk) begin
 		case(rx_fsm_q)
 			RX_IDLE : rx_fsm_q <= data_start_i & ~data_conf_i? RX_DATA: RX_IDLE;
 			RX_DATA : rx_fsm_q <= rx_cnt_q == PKT_DATA_CNT ? RX_READY: RX_DATA;
-			RX_READY: rx_fst_q <= RX_IDLE; 
-			default : rx_fst_q <= RX_IDLE;
+			RX_READY: rx_fsm_q <= RX_IDLE; 
+			default : rx_fsm_q <= RX_IDLE;
 		endcase
 	end
 end
@@ -68,7 +68,7 @@ always @(posedge clk)
 	else rx_cnt_q <= rx_cnt_q + {{PKT_DATA_CNT_W-1{1'b0}}, 1'b1}; 
 
 always @(posedge clk) 
-	payload_q <= {payload_q[PKT_DATA_W-PHT_W-1:0], data_i}; 
+	payload_q <= {payload_q[PKT_DATA_W-PHY_W-1:0], data_i}; 
 
 /* accelerator */
 wire [15:0] mul_res;

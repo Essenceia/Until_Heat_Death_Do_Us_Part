@@ -21,13 +21,14 @@ module mac_conf #(
 	localparam PHY_W = 2,
 	localparam VID_W = 12,
 	localparam MAC_W = 48,
-	parameter DEFAULT_TX_CLK_PHASE = 1'b1, // 180 degrees phase from ref_clk
 	parameter [VID_W-1:0] DEFAULT_VID = 12'hDAD,
-	parameter [MAC_W-1:0] DEFAULT_MAC = 48'h0090CF00BEEF // nortel manifacturer
+	parameter [MAC_W-1:0] DEFAULT_MAC = 48'h0090CF00BEEF // nortel beef 
 )
 (
 	input clk, 
 	input rst_n,
+
+	input wire           default_tx_phase_i, 
 	
 	input wire           data_v_i,
 	input wire           data_conf_i,
@@ -84,7 +85,7 @@ always @(posedge clk)
 
 always @(posedge clk) 
 	if (~rst_n) 
-		{ mac_addr_q, vid_q, phase_sel_q} <= { DEFAULT_MAC, DEFAULT_VID ,1'b0, DEFAULT_TX_CLK_PHASE};
+		{ mac_addr_q, vid_q, phase_sel_q} <= { DEFAULT_MAC, DEFAULT_VID ,1'b0, default_tx_phase_i};
 	else if (fsm_q == CONF)
 		{ mac_addr_q, vid_q, phase_sel_q} <= {mac_addr_q[MAC_W-3:0], vid_q, phase_sel_q, data_i };
 		
