@@ -7,8 +7,17 @@ granted to use it to train any model.
 
 `default_nettype none
 
-module tt_um_teapot (
-    input  wire [7:0] ui_in,    
+module tt_um_teapot #(
+	localparam PHY_W = 2,
+	localparam VID_W = 12,
+	localparam MAC_W = 48,
+ 	parameter [15:0]      APP_ETHTYPE  = 16'h88B5,
+	parameter [15:0]      CONF_ETHTYPE = 16'h88B6, 
+	parameter             DEFAULT_TX_CLK_PHASE = 1'b1, 
+	parameter [VID_W-1:0] DEFAULT_VID = 12'hDAD,
+	parameter [MAC_W-1:0] DEFAULT_MAC = 48'h0090CF00BEEF // nortel manifacturer
+)(
+	input  wire [7:0] ui_in,    
     output wire [7:0] uo_out,   
     input  wire [7:0] uio_in,   
     output wire [7:0] uio_out,  
@@ -32,9 +41,11 @@ wire        data_rx_err;
 wire [1:0]  data_rx;
 wire [47:0] data_rx_src_mac; 
 
-wire       mac_tx_v;
-wire       mac_tx_start;
-wire [1:0] mac_tx;
+wire        mac_tx_v;
+wire        mac_tx_acc;
+wire [1:0]  mac_tx;
+wire [47:0] mac_tx_dst_mac;
+
 wire       mac_rx_err;
 wire       mac_rx_v;
 wire [1:0] mac_rx;
@@ -115,7 +126,10 @@ rmii m_rmii(
 );
 
 // rx mac 
-mac_rx m_mac_rx(
+mac_rx #(
+	.APP_ETHTYPE(APP_ETHTYPE),
+	.CONF_ETHTYPE(CONF_ETHTYPE)
+)m_mac_rx(
 	.clk(clk),
 	.rst_n(rst_n),
 
@@ -131,7 +145,7 @@ mac_rx m_mac_rx(
 	.data_start_o(data_rx_start),
 	.data_err_o(data_rx_err),
 	.data_o(data_rx),
-	.data_src_mac(data_src_mac)
+	.data_src_mac_o(data_src_mac)
 );
 
 //application
@@ -146,14 +160,18 @@ app_wrapper m_app_wrapper(
 	.data_i        (data_rx),
 	.data_src_mac_i(data_rx_src_mac),
 
-	.mac_tx_v_o      (),
-	.mac_tx_acc_o    (),
-	.mac_tx_o        (),
-	.mac_tx_dst_mac_o()
+	.mac_tx_v_o      (mac_tx_v),
+	.mac_tx_acc_i    (mac_tx_acc),
+	.mac_tx_o        (mac_tx),
+	.mac_tx_dst_mac_o(mac_tx_dst_mac)
 );
 
 // playpen config
-mac_conf m_mac_conf(
+mac_conf #(
+	.DEFAULT_TX_CLK_PHASE(DEFAULT_TX_CLK_PHASE),
+	.DEFAULT_VID(DEFAULT_VID),
+	.DEFAULT_MAC(DEFAULT_MAC)
+)m_mac_conf(
 	.clk(clk),
 	.rst_n(rst_n),
 

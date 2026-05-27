@@ -67,7 +67,7 @@ reg [VID_W-1:0] vid_q;
 assuming errors will show up before payload
 can't handle errors if they occure after header
 given we don't have the area to do config store and forward */
-always @(posedge clk) 
+always @(posedge clk) begin 
 	if (~rst_n) 
 		fsm_q <= IDLE; 
 	else begin
