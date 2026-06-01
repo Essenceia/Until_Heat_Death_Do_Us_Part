@@ -40,13 +40,13 @@ class eth_frame:
 	body: bytes = bytes(48)
 	fcs: bytes = b'\xff\xff\xff\xff'
 	
-	def random_body(self):
+	def random_body(self, ethtype=b'\x08\x04')):
 		l = random.randint(48,60)
 		body = bytearray(0)
 		for i in range(0,l):
 			body.append(random.randint(0,255))
-		self.body = body
-		self.header = self.header._replace(ethtype = struct.pack('!H', l))
+		self.set_payload(body, ethtype)
+		
 
 	def set_payload(self, payload, ethtype=b'\x08\x04'):
 		self.body = payload
@@ -93,8 +93,8 @@ async def phy_stream_frame(dut, raw):
 async def send_simple_frame(dut):
 	random.seed(0)
 	# group dst address
-	frame = eth_frame(b"\xFF\xFF\x00\xFF\x00\xFF",b"\x00\x11\x22\x33\x44\x00")
-	frame.random_body()
+	frame = eth_frame(b"\xFF\xFF\x00\xFF\x00\xFF",b"\x00\x90\xCF\00\xBE\xEF")
+	frame.random_body(ethtype = b"\x88\xB5")
 	await phy_stream_frame(dut,frame.raw())
 
 		
