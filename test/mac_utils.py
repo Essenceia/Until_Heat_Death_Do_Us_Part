@@ -154,4 +154,17 @@ def simple_frame() -> eth_frame:
 	frame = eth_frame(dst=DEFAULT_DEVICE_MAC, src=b"\x00\xF0\x00\xFF\x00\xFF")
 	frame.random_body(ethtype = APP_ETHTYPE)
 	return frame
-		
+
+def test_filtered_packets() -> eth_frame:
+	accepted_pkt = simple_frame()
+	dst_mac = DEFAULT_DEVICE_MAC
+	src_mac = random.randbytes(6)
+	ethtype = APP_ETHTYPE
+	if (random.randint(0,100) < 10):
+		dst_mac = random.randbytes(6)
+	if (random.randint(0,100) < 10):
+		ethtype = random.randbytes(2)
+	frame = eth_frame(dst = dst_mac, src = src_mac)
+	frame.random_body(ethtype = ethtype)
+	return frame
+	
