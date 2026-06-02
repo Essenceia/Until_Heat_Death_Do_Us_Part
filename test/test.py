@@ -95,6 +95,7 @@ async def simple_rx_test(dut):
 
 @cocotb.test()
 async def filter_rx_test(dut):
+	await rst(dut)
 	for _ in range(0,10):
 		await send_and_check_frames(dut, mac_utils.test_filtered_packets())
 	await ClockCycles(dut.clk, 10)
