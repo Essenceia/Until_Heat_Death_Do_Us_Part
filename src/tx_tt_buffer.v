@@ -46,8 +46,8 @@ assign tx_v_buff = ~(~tx_v_i); (* dont_touch *)
 assign tx_buff   = ~(~tx_i); (* dont_touch *)
 
 always @(posedge inner_clk) begin
-	tx_v_q <= tx_v_i; 
-	tx_q   <= tx_i; 
+	tx_v_q <= tx_v_buff; 
+	tx_q   <= tx_buff; 
 end
 
 assign tx_v_o = tx_v_q; 
