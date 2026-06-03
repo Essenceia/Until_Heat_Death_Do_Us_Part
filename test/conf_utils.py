@@ -7,9 +7,9 @@ import random
 
 class config_payload():
 	addr: bytes(6)
-	vid: bytes(2)
-	phase: bytes(1)
-	padding: bytes(37)
+	vid: bytes(2) #12 bits
+	phase: bytes(1) # only top bit
+	padding: bytes(38)
 
 	def random(self):
 		self.addr = random.randbytes(6)
@@ -32,7 +32,22 @@ class config_payload():
 	def raw(self):
 		r = bytearray()
 		r += self.addr
-		r += self.vid
-		r += self.phase
+		r += self.vid[0].to_bytes()
+		cat = (self.vid[1] & 0xf0) | ((self.phase[0] & 0x80) >> 4)
+		r += cat.to_bytes()
 		r += self.padding
+		assert(len(r) == 46, f"expected 46, got length {len(r)} value {r.hex()}")
 		return r
+	
+	def __str__(self) -> string:
+		s = ""
+		for i, b in enumerate(self.addr):
+			if i: 
+				s += ":" 
+			s += f"{b:02x}"
+		s+= " "+self.vid.hex()[0:3]+" "
+		if self.phase[0] & 0x80:	
+			s += "1"
+		else: 
+			s += "0"
+		return s

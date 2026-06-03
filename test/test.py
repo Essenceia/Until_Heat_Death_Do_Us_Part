@@ -108,3 +108,4 @@ async def filter_rx_test(dut):
 async def update_eth_config(dut):
 	await rst(dut)
 	await send_frame(dut, mac_utils.simple_config())
+	await ClockCycles(dut.clk, 10)

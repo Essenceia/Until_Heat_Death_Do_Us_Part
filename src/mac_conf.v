@@ -74,14 +74,14 @@ always @(posedge clk) begin
 	else begin
 		case(fsm_q)
 			IDLE: fsm_q <=  data_start_i & ~data_err_i & data_conf_i ? CONF: IDLE; 
-			CONF: fsm_q <=  cnt_q == PKT_DATA_CNT? IDLE: CONF;
+			CONF: fsm_q <=  cnt_q == PKT_DATA_CNT ? IDLE: CONF;
 		endcase
 	end
 end
 
 always @(posedge clk) 
 	if (fsm_q == IDLE) cnt_q <= {PKT_DATA_CNT_W{1'b0}};
-	else cnt_q <= { {PKT_DATA_CNT_W-1{1'b0}}, 1'b1};
+	else cnt_q <= cnt_q + {{PKT_DATA_CNT_W-1{1'b0}}, 1'b1};
 
 always @(posedge clk) 
 	if (~rst_n) 
