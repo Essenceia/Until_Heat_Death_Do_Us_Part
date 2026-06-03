@@ -25,8 +25,8 @@ module mac_conf #(
 	parameter [MAC_W-1:0] DEFAULT_MAC = 48'h0090CF00BEEF // nortel beef 
 )
 (
-	input clk, 
-	input rst_n,
+	input wire clk, 
+	input wire rst_n,
 
 	input wire             default_tx_phase_i, 
 	

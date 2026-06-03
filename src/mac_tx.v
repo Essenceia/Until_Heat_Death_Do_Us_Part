@@ -20,7 +20,7 @@ module mac_tx #(
 	localparam ETHTYPE_W = 16,
 	parameter APP_ETHTYPE = 16'h88B6 
 )(
-	input clk, 
+	input wire clk, 
 	input wire rst_n, 
 
 	input wire [MAC_W-1:0] phy_mac_i, 

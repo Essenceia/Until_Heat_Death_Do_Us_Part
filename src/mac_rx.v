@@ -20,7 +20,7 @@ module mac_rx #(
 	parameter [15:0] APP_ETHTYPE  = 16'h88B5,
 	parameter [15:0] CONF_ETHTYPE = 16'h88B6
 )(
-	input clk, 
+	input wire clk, 
 	input wire rst_n, 
 
 	input wire [MAC_W-1:0] phy_mac_i, 

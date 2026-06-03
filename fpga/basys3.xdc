@@ -76,7 +76,7 @@ set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
 set_property CONFIG_MODE SPIx4 [current_design]
 
 # refclk 
-create_generated_clock -name clk_phy_o -source [get_pins -regexp "*/m_oddr_refclk/C"]  -divide_by 1 [get_ports clk_bus_o]
+create_generated_clock -name clk_phy_o -source [get_pins -hier -regexp ".*m_oddr_refclk/C"]  -divide_by 1 [get_ports clk_phy_o]
 
 # oscillator
 set_property -dict { PACKAGE_PIN W5   IOSTANDARD LVCMOS33 } [get_ports clk_osc_i]

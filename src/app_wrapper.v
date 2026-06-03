@@ -16,7 +16,7 @@ module app_wrapper #(
 	parameter PHY_W = 2,
 	localparam MAC_W = 48 
 )(
-	input clk, 
+	input wire clk, 
 	input wire rst_n, 
 
 	input wire             data_v_i,
@@ -24,7 +24,7 @@ module app_wrapper #(
 	input wire             data_start_i,
 	input wire             data_err_i,
 	input wire [PHY_W-1:0] data_i,
-	input wire [MAC_W-1:0]      data_src_mac_i, 
+	input wire [MAC_W-1:0] data_src_mac_i, 
 
 	output wire             mac_tx_v_o,// request and valid
 	output wire             mac_tx_last_o,

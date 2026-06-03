@@ -17,8 +17,8 @@ checking the implementation results.
 credit for pointing the timing issue out: tnt
 */ 
 module tx_tt_buffer(
-	input ref_clk, 
-	input rst_n,
+	input wire ref_clk, 
+	input wire rst_n,
 	
 	input wire clk_phase_sel_i, // use dephased clk by 180 to drive tx output
 

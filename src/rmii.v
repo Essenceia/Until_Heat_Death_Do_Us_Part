@@ -10,7 +10,7 @@ granted to use it to train any model.
 /* This RMII assumes full duplex operations, no carrier sense/receiver data valid
    signal will be passed. */
 module rmii(
-	input      clk,
+	input wire clk,
 	input wire rst_n, 
 
 	input wire        clk_phase_sel_i,

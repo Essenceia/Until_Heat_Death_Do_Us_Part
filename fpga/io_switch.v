@@ -15,18 +15,22 @@ Sel direction :
 module io_switch #(
 	parameter W = 8
 )(
-	input  [W-1:0] dir_sel_i,		
-	input  [W-1:0] data_out_i,
-	output [W-1:0] data_in_o,
-	inout  [W-1:0] pin_io
+	input  wire [W-1:0] dir_sel_i,		
+	input  wire [W-1:0] data_out_i,
+	output wire [W-1:0] data_in_o,
+	inout  wire [W-1:0] pin_io
 );
 
 // tristate buff for out dir
 genvar i; 
 generate 
 	for (i = 0; i < W; i++) begin: g_tristate
-		assign pin_io[i] = (dir_sel_i[i])? data_out_i[W]: 1'bz; 
-		assign data_in_o[i] = ~dir_sel_i[i] & pin_io[W];// clamp to 0 to help debug
+		IOBUF m_iobuf(
+			.O(data_in_o[i]),
+			.I(data_out_i[i]),
+			.IO(pin_io[i]),
+			.T(dir_sel_i[i])
+		); 
 	end
 endgenerate
 endmodule

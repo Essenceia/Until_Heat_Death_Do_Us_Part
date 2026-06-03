@@ -21,6 +21,7 @@ if { $use_gates } {
 	read_verilog -sv $gate_nl
 	read_verilog -sv $gate_lib
 } else {
+	puts "Reading system verilog sources src:'$src_path' lib:'$lib_path'"
 	read_verilog -sv [glob -directory $src_path *.v]
 	read_verilog -sv [glob -directory $lib_path *.v]
 }
