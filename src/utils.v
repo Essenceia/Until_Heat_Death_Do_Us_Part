@@ -8,7 +8,7 @@ granted to use it to train any model.
 module byteswap #(
 	parameter W = 6
 )(
-	input wire [8*W-1:0] i,
+	input wire  [8*W-1:0] i,
 	output wire [8*W-1:0] o
 );
 
