@@ -34,6 +34,7 @@ class config_payload():
 		r = bytearray()
 		r += self.addr
 		r += self.vid
+		r += self.phase
 		r += self.padding
 		assert(len(r) == 46, f"expected 46, got length {len(r)} value {r.hex()}")
 		return r
@@ -45,8 +46,9 @@ class config_payload():
 				s += ":" 
 			s += f"{b:02x}"
 		s+= " "+self.vid.hex()[0:3]+" "
-		if self.phase[0] & 0x01:	
+		if self.phase[0] & 0x01 :	
 			s += "1"
 		else: 
 			s += "0"
+		s+= "("+self.phase.hex()[0]+")"
 		return s
