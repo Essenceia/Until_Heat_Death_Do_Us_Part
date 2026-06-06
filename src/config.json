@@ -33,7 +33,7 @@
 
 
   "//": "Configuration docs: https://librelane.readthedocs.io/en/latest/reference/configuration.html",
-  "LINT_VLT": "dir::../config/waiver.vlt",
+  "LINT_VLT": "dir::../conf/waiver.vlt",
   "SYNTH_AUTONAME": "True",
 
   "//": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
