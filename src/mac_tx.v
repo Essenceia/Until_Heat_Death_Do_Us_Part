@@ -110,9 +110,9 @@ crc_8 m_fcs(
 // output shift buffer
 localparam BUFF_W = MAC_W; // max(MAC_W, FCS, ETHTYPE)
 reg [BUFF_W-1:0] shift_buff_q;
-wire sel_src_mac;
-wire sel_dst_mac;
-wire sel_ethtype; 
+reg sel_src_mac_q;
+reg sel_dst_mac_q;
+reg sel_ethtype_q; 
 wire sel_fcs;
 
 assign sel_dst_mac = (fsm_q == SFD) & (cnt_q == SFD_CNT);
