@@ -102,7 +102,7 @@ assign swap_rst_conf[3*8-1-:8] = DEFAULT_MAC[MAC_W-2*8-1-:8];
 assign swap_rst_conf[4*8-1-:8] = DEFAULT_MAC[MAC_W-3*8-1-:8];
 assign swap_rst_conf[5*8-1-:8] = DEFAULT_MAC[MAC_W-4*8-1-:8];
 assign swap_rst_conf[6*8-1-:8] = DEFAULT_MAC[MAC_W-5*8-1-:8];
-assign swap_rst_conf[7*8-1-:8] = { {4{1'bx}}, DEFAULT_VID[VID_W-4-1:8]};
+assign swap_rst_conf[7*8-1-:8] = { {4{1'bx}}, DEFAULT_VID[VID_W-1:8]};
 assign swap_rst_conf[8*8-1-:8] = DEFAULT_VID[8-1:0];
 assign swap_rst_conf[9*8-1-:8] = { {7{1'bx}}, default_tx_phase_i};
 
