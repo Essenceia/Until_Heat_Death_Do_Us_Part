@@ -3,6 +3,7 @@
 # expressed from the perspective of the PHY chip and not the ASIC 
 
 set ref_clk [get_clocks $::env(CLOCK_PORT)] 
+set out_clk [get_clocks $::env(OUTPUT_CLOCK)]
 
 # output direction (input to the ASIC) RXD[1:0], RXER, CRS_DV (RXV)
 set rx_pins {uio_in[0] uio_in[1] uio_in[2] uio_in[3]}
@@ -21,7 +22,7 @@ set tsu 4
 # input hold time after rising edge of refclk
 set tihold 1.5
 
-set_output_delay -clock ${ref_clk} -max ${tsu} ${tx_pins} 
-set_output_delay -clock ${ref_clk} -min ${tihold} ${tx_pins} 
+set_output_delay -clock ${out_clk} -max ${tsu} ${tx_pins} 
+set_output_delay -clock ${out_clk} -min ${tihold} ${tx_pins} 
 
 
