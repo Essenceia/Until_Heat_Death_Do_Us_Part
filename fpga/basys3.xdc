@@ -89,7 +89,5 @@ set ::env(CLOCK_PORT) "clk"
 
 
 # set data delays
-set ::env(PHY_RX_PINS) {m_top/uio_in[0] m_top/uio_in[1] m_top/uio_in[2] m_top/uio_in[3]}
-set ::env(PHY_TX_PINS) {m_top/uo_out[0] m_top/uo_out[1] m_top/uo_out[2]}
-
-read_sdc ../src/lan8720a.sdc
+set ::env(PHY_RX_PINS) [get_ports -regexp pin_io.*]
+set ::env(PHY_TX_PINS) [get_ports -regexp phy_tx.*]

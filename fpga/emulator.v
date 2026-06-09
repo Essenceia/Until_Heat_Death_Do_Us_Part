@@ -98,14 +98,29 @@ ODDR #(
 	.R(rst_async),
 	.S(1'b0)
 );
+wire dup; 
+ODDR #(
+	.DDR_CLK_EDGE("SAME_EDGE"),
+	.INIT(1'b1),
+	.SRTYPE("ASYNC")
+) m_oddr_refclk_dup(
+	.Q(dup),
+	.C(clk),
+	.CE(1'b1),
+	.D1(1'b1),
+	.D2(1'b0),
+	.R(rst_async),
+	.S(1'b0)
+);
 
 /* debug leds */
 assign led_o[0] = rst_async;
 assign led_o[1] = ena;
 assign led_o[2] = clk_ibuf;
 assign led_o[3] = pll_lock_q; 
+assign led_o[4] = dup; 
 
-assign led_o[11:4] = 8'd0;
+assign led_o[11:5] = 7'd0;
 
 assign led_o[12]    = tck;
 assign led_o[13]    = tdi;

@@ -2,11 +2,8 @@ set checkpoint_path [lindex $argv 0]
 set bit_path [lindex $argv 1]
 puts "Programming script called with checkpoint path $checkpoint_path, loading bitsteam $bit_path"
 
-
-
 puts "Opening program at $checkpoint_path"
 open_checkpoint $checkpoint_path 
-
 
 open_hw_manager
 connect_hw_server
@@ -23,9 +20,7 @@ if { [current_hw_target] ne "" } {
 	set fail [program_hw_device -verbose]
 	
 } else {
-
 	puts "Error : no hw target detected !"
-
 }
 
 close_hw_manager

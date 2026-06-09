@@ -27,6 +27,8 @@ if { $use_gates } {
 }
 read_xdc [glob *.xdc]
 
+read_xdc "../src/lan8720a.sdc"
+
 # to save the hastle of calling synth with top specified
 set_property top emulator [current_fileset]
 
