@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <assert.h> 
 #include "eth_defs.h" 
+#include <stddef.h>
 
 typedef struct{
 	mac_addr_t dst_mac;
@@ -35,5 +36,7 @@ static_assert(CONF_PACKET_LENGTH == _MIN_ETH_FRAME_LENGTH);
 void set_header(eth_header_t* header, mac_addr_t dst, mac_addr_t src, uint16_t ethtype);
 
 uint8_t* create_app_packet(mac_addr_t dst_mac, mac_addr_t src_mac, uint16_t a, uint16_t b);
+
+void print_packet(uint8_t *pkt, size_t pkt_lenght);
 
 #endif // PACKETS_H

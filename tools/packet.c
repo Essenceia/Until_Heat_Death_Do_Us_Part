@@ -2,12 +2,13 @@
 #include <string.h> 
 #include <arpa/inet.h>
 #include <stdlib.h> 
+#include <stdio.h>
 
 void set_header(eth_header_t* header, 
 	mac_addr_t dst, mac_addr_t src, uint16_t ethtype)
 {
 	memcpy(header->dst_mac, dst, MAC_W);
-	memcpy(header->src_mac, dst, MAC_W);
+	memcpy(header->src_mac, src, MAC_W);
 	header->ethtype = ethtype;
 }
 
@@ -25,4 +26,10 @@ uint8_t* create_app_packet(
 	return raw; 
 }
 
-
+void print_packet(uint8_t *pkt, size_t pkt_lenght){
+	assert(pkt); 
+	printf("print packet: 0x");
+	for(size_t i=0; i< pkt_lenght; i++){
+		printf("%02x", pkt[i]);
+	}
+}

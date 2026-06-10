@@ -65,8 +65,12 @@ int main(int argc, char * argv[]){
 	memcpy(sock_addr.sll_addr, asic_mac_addr, MAC_W);
 
 	/* create application packet */
-	uint8_t *raw_app_pkt = create_app_packet(asic_mac_addr, device_mac_addr, 0xBEEF,0xCAFE);
-
+	uint16_t a = 0xBEEF;
+	uint16_t b = 0xCAFE;
+	a = 0;
+	b = 0;
+	uint8_t *raw_app_pkt = create_app_packet(asic_mac_addr, device_mac_addr, a,b);
+	print_packet(raw_app_pkt, APP_PACKET_LENGTH);
 	/* send app packet */
     ssize_t sent;
 

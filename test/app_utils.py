@@ -40,6 +40,6 @@ def layer3_app(payload:bytes(46)) -> bytes(46):
 	resp.append(res & 0xff)
 	for _ in range(0, 46-2):
 		resp.append(0)
-	cocotb.log.info(f"layer3 app {hex(a)}*{hex(b)}={hex(res)}\nreq {payload.hex()}\nres {resp.hex()}")
+	cocotb.log.debug(f"layer3 app {hex(a)}*{hex(b)}={hex(res)}\nreq {payload.hex()}\nres {resp.hex()}")
 	return resp
 	

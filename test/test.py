@@ -78,6 +78,7 @@ async def send_and_check_frames(dut,rx : eth_frame):
 		tx_raw = tx.raw(is_rmii_tx = True)
 		expected = tx_raw.hex()
 		gotten = tx_frame.tobytes().hex()
+		cocotb.log.info(f"tx {gotten}")
 		if (expected != gotten): 
 			cocotb.log.error(f"Error, missmatch between expected and gotten tx ethernet frame\nexp {expected}\ngot {gotten}")
 			debug_string = 4*" "
