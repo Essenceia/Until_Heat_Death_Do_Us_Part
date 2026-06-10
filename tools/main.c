@@ -70,7 +70,7 @@ int main(int argc, char * argv[]){
 	/* send app packet */
     ssize_t sent;
 
-	for (int i = 0; i < 500000; i++){
+	for (int i = 0; i < 50000; i++){
 		if(sendto(sock, raw_app_pkt, APP_PACKET_LENGTH, 0,(struct sockaddr *)&sock_addr, sizeof(sock_addr)) < 0){
 			//close(sock);
 			free(raw_app_pkt);
