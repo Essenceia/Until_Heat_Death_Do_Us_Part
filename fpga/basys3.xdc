@@ -48,7 +48,7 @@ set_property -dict { PACKAGE_PIN K17   IOSTANDARD LVCMOS33 } [get_ports {phy_rx_
 set_property -dict { PACKAGE_PIN M18   IOSTANDARD LVCMOS33 } [get_ports {phy_rx_i[1]}];
 set_property -dict { PACKAGE_PIN N17   IOSTANDARD LVCMOS33 } [get_ports {phy_rx_v_i}];
 set_property -dict { PACKAGE_PIN P18   IOSTANDARD LVCMOS33 } [get_ports {phy_rx_err_i}];
-set_property -dict { PACKAGE_PIN L17   IOSTANDARD LVCMOS33 } [get_ports {clk_phy_i}];
+set_property -dict { PACKAGE_PIN L17   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {clk_phy_i}];
 set_property -dict { PACKAGE_PIN M19   IOSTANDARD LVCMOS33 DRIVE 16 SLEW FAST PULLDOWN true } [get_ports {phy_tx_o[0]}];
 set_property -dict { PACKAGE_PIN P17   IOSTANDARD LVCMOS33 DRIVE 16 SLEW FAST PULLDOWN true } [get_ports {phy_tx_o[1]}];
 set_property -dict { PACKAGE_PIN R18   IOSTANDARD LVCMOS33 DRIVE 16 SLEW FAST PULLDOWN true } [get_ports {phy_tx_v_o}];
@@ -88,7 +88,6 @@ set_property CONFIG_MODE SPIx4 [current_design]
 
 # phy_clk
 set ref_clk "clk_phy_i"
-set_property -dict { PACKAGE_PIN C15   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports $ref_clk] 
 create_clock -add -name $ref_clk -period 20.00 -waveform {0 10} [get_ports $ref_clk]
 # pll clock creation infered by tools and pll params
 

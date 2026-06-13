@@ -54,7 +54,8 @@ gf180mcu_fd_sc_mcu7t5v0__mux2_2 m_ref_clk_mux(
 
 `else
 assign ref_clk_inv = ~ref_clk;
-assign inner_clk = clk_phase_sel_q ? ref_clk_inv: ref_clk; 
+//assign inner_clk = clk_phase_sel_q ? ref_clk_inv: ref_clk; 
+assign inner_clk = ref_clk; 
 `endif
 
 

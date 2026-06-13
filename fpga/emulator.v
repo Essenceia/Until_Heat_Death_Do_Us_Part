@@ -9,14 +9,14 @@ module emulator #(
    	input wire clk_phy_i, /* RMII ref clk 50MHz */
  
 	// PmodC	
-	inout  wire [1:0]  phy_rx_i,
-	inout  wire        phy_rx_v_i,
-	inout  wire        phy_rx_err_i,
+	input  wire [1:0]  phy_rx_i,
+	input  wire        phy_rx_v_i,
+	input  wire        phy_rx_err_i,
 	output  wire [1:0] phy_tx_o,
 	output  wire       phy_tx_v_o,
 
 	// Misc
-	input wire [SWITCH_W-1:0] switch_i,
+	input wire  [SWITCH_W-1:0] switch_i,
 	output wire [LED_W-1:0]   led_o,
 
 	output wire [11:0]        unused_o
@@ -76,14 +76,9 @@ assign led_o[0] = rst_async;
 assign led_o[1] = tx_phase_async;
 assign led_o[2] = ena;
 assign led_o[3] = clk;
+assign led_o[4] = pll_lock_q; 
 
-assign led_o[5:4] = phy_rx_i;
-assign led_o[6]   = phy_rx_v_i;
-assign led_o[7]   = phy_rx_err_i;
-assign led_o[9:8] = phy_tx_o;
-assign led_o[10]  = phy_tx_v_o;
-assign led_o[11]  = pll_lock_q; 
-assign led_o[15:12] = 4'd0;
+assign led_o[15:5] = 11'd0;
 
 assign unused_o = {4'h0, 1'b1, {7{1'b1}}}; // an, dp, seg
 
