@@ -1,21 +1,27 @@
-BIN_NAME=test
+BIN_NAME=packet_sender
 DEFAULT_ETH=enp2s0
-C_FLAGS=
-SRC=$(wildcard *.c) $(wildcard *.h)
 
-.PHONY: build clean trace run
+SRC_C := $(wildcard *.c)
+SRC_CPP := $(wildcard *.cpp)
 
+OBJ:=$(SRC_C:.c=.c.o) $(SRC_CPP:.cpp=.cpp.o)
+
+$(info obj $(OBJ))
+
+.PHONY: build clean trace run $(BIN_NAME)
 
 # implicit rules 
 # all c objects 
-%.o: %.c
+%.c.o: %.c
 	gcc $(C_FLAGS) -o $@ -c $<
 
-%.o: %.cpp
+%.cpp.o: %.cpp
 	g++ -std=c++23 -o $@ -c $< 
 
-build: ${SRC}
-	gcc -o ${BIN_NAME} ${SRC}
+$(BIN_NAME): $(OBJ) 
+	gcc -o $@ -lstdc++ -lm $(OBJ)
+
+build: $(BIN_NAME) 
 
 #debug network socket/connection failures
 trace: build 
@@ -27,3 +33,4 @@ run: build
 clean:
 	rm -f ./${BIN_NAME}
 	rm -f ./vgcore*
+	rm -f ./*.o
