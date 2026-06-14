@@ -36,10 +36,10 @@ class config_payload():
 		r += self.vid
 		r += self.phase
 		r += self.padding
-		assert(len(r) == 46, f"expected 46, got length {len(r)} value {r.hex()}")
+		assert len(r) == 46, f"expected 46, got length {len(r)} value {r.hex()}"
 		return r
 	
-	def __str__(self) -> string:
+	def __str__(self) -> str:
 		s = ""
 		for i, b in enumerate(self.addr):
 			if i: 
