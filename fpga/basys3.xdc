@@ -91,11 +91,29 @@ set ref_clk "clk_phy_i"
 create_clock -add -name $ref_clk -period 20.00 -waveform {0 10} [get_ports $ref_clk]
 # pll clock creation infered by tools and pll params
 
+# tx phase select clk
+set dephase_clk "dephase_clk"
+# inverted clk
+#set ref_clk_inv_net [get_nets -hire -regexp ".*m_tx_delay.*ref_clk_inv"]
+#create_generated_clock -name ref_clk_inv -source [get_ports $ref_clk] -divide_by 1 -invert  $ref_clk_inv_net
+
+# mux paths 
+set dephase_clk_net [get_nets -hier -regexp ".*/inner_clk" ]
+set dephase_clk_0 "dephase_clk_0"
+set dephase_clk_1 "dephase_clk_1"
+create_generated_clock -name $dephase_clk_0 -source [get_ports $ref_clk] -master_clock $ref_clk -divide_by 1 $dephase_clk_net -add
+create_generated_clock -name $dephase_clk_1 -source [get_ports $ref_clk] -master_clock $ref_clk -divide_by 1 -invert $dephase_clk_net -add 
+set_clock_groups -logically_exclusive -group $dephase_clk_0 -group $dephase_clk_1
+ 
+ 
+#set dephase_clk_net [get_nets -hier -regexp ".*/inner_clk" ]
+#create_generated_clock -name $dephase_clk -source [get_ports $ref_clk] -divide_by 1 -invert $dephase_clk_net
 
 # lan8720a configs
 set ::env(PHY_RX_PINS) [get_ports -regexp phy_rx.*]
 set ::env(PHY_TX_PINS) [get_ports -regexp phy_tx.*]
 set ::env(CLOCK_PORT) $ref_clk
-set ::env(OUTPUT_CLOCK) $ref_clk
+set ::env(OUTPUT_CLOCK_0) $dephase_clk_0
+set ::env(OUTPUT_CLOCK_1) $dephase_clk_1
 
 
