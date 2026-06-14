@@ -48,10 +48,10 @@ async def rst(dut, ena=1 ):
 	await ClockCycles(dut.clk, 20)
 
 # send only, used to test config frames where no response is expected
-async def send_frame(dut, rx: eth_frame):
+async def send_frame(dut, rx: mac_utils.eth_frame):
 	await mac_utils.phy_stream_frame(dut, rx.raw())
 
-async def send_and_check_frames(dut,rx : eth_frame):
+async def send_and_check_frames(dut, rx: mac_utils.eth_frame):
 	tx_sent, tx = mac_utils.expected_response(rx)
 	if tx_sent: 
 		read_tx_thread = cocotb.start_soon(mac_utils.read_tx_frame(dut))
