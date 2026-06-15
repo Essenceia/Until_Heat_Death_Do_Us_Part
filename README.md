@@ -64,19 +64,20 @@ whos existence linux networking libraries are unaware of. So trust me: it's real
 
 #### Configuration parameters 
 
-**MAC address** 
+##### MAC address
+
 ASIC's current MAC address, all packets not addressed (`dst mac`) to this address will be filtered out, 
 and all responses will use this as the source address. 
 
 Default MAC: `00:90:CF:00:BE:EF` (read as Nortel:BEEF)
 
-**VLAN ID** 
+##### VLAN ID
 In the event a packet is vlan tagged, packets not matching the VLAN ID will be filtered out. 
 If a packet isn't vlan tagged, it is assumed to belong to our current VLAN. 
 
 Default VLAN ID: `0xDAD`
 
-**TX data to reference clock phase offset** 
+##### TX data to reference clock phase offset
 To comphensate for the output data to reference clock offset induced by the delay on the path from the clock 
 input pin, to the tiny tapeout design's data out flip-flop and back to the output pin, the reference 
 clock for the data out flip flop is selectable, allowing us to use a 180 degree dephased reference clock. 
@@ -85,8 +86,8 @@ This dephasing configuration is captured during reset depending on the state of 
 then be configured at runtime based on the config packet content. 
 
 Values: 
-`0` - no phase shift
-`1` - 180 degree phase shift
+- `0` no phase shift
+- `1` 180 degree phase shift
 
 ## Assumptions 
 
@@ -119,3 +120,7 @@ List of potenciel future improvements :
 - Make the wrapper easy to import into a third party project
 - Add perf counters and expose said counters over JTAG 
 - Management data to JTAG bridge ? (MDIO/MDC)
+
+## Credits
+
+Thanks to the Tiny Tapeout project, its contributors, and all the community working on open source silicon tools for making this possible.
