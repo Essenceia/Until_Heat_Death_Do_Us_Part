@@ -31,10 +31,12 @@ module tb ();
 	wire [1:0] phy_rx;
 	wire       phy_rx_v;
 	wire       phy_rx_err;
-
+	
 	// TX parth 
 	wire [1:0] phy_tx;
 	wire       phy_tx_v;
+
+	wire       tx_phase; 
 
 	assign ui_in[1:0] = phy_rx;
 	assign ui_in[2]   = phy_rx_v;
@@ -42,6 +44,8 @@ module tb ();
 
 	assign phy_tx      = uo_out[1:0];
 	assign phy_tx_v    = uo_out[2];
+
+	assign ui_in[7]    = tx_phase;
 
 	tt_um_teapot m_dut (
 		  .ui_in  (ui_in),    // Dedicated inputs

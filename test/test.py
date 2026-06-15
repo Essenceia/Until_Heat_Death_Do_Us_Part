@@ -35,6 +35,7 @@ def start_clk(dut):
 # Reset sequence
 async def rst(dut, ena=1 ):
 	dut.rst_n.value = 0
+	dut.tx_phase.value = 0
 	clk_task = start_clk(dut)
 	await ClockCycles(dut.clk, 2)
 	# set default phy rx
