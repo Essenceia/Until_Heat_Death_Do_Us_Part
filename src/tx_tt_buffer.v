@@ -29,6 +29,7 @@ module tx_tt_buffer(
 	output wire [1:0] tx_o
 );
 wire      ref_clk_inv; 
+wire      ref_clk_buf; 
  
 wire      inner_clk; 
 reg       tx_v_q; 
@@ -44,17 +45,22 @@ gf180mcu_fd_sc_mcu7t5v0__clkinv_1 m_ref_clk_inv(
 	.I(ref_clk),
 	.ZN(ref_clk_inv)
 );
-
-gf180mcu_fd_sc_mcu7t5v0__mux2_2 m_ref_clk_mux(
+gf180mcu_fd_sc_mcu7t5v0__clkbuf_1 m_ref_clk_buf(
+	.I(ref_clk),
+	.Z(ref_clk_buf)
+); 
+ 
+gf180mcu_fd_sc_mcu7t5v0__mux2_1 m_ref_clk_mux(
 	.I0(ref_clk_inv),
-	.I1(ref_clk),
+	.I1(ref_clk_buf),
 	.S(clk_phase_sel_q),
 	.Z(inner_clk)
 );
 
 `else
 assign ref_clk_inv = ~ref_clk;
-assign inner_clk = clk_phase_sel_q ? ref_clk_inv: ref_clk; 
+assign ref_clk_buf = ref_clk;
+assign inner_clk = clk_phase_sel_q ? ref_clk_inv: ref_clk_buf; 
 `endif
 
 

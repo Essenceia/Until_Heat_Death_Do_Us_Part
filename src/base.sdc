@@ -26,18 +26,23 @@ proc get_all_dff_clk_port { clk } {
 	return $ret
 }
 
-set mux_clk_cell [get_cells -hierarchical -regexp ".*m_ref_clk_mux"]
-set mux_clk_pin [get_first_output_pin $mux_clk_cell]
+set ref_clk_mux_cell [get_cells -hierarchical -regexp ".*m_ref_clk_mux"]
+set ref_clk_mux_pin [get_first_output_pin $ref_clk_mux_cell]
 
 #can't use the combinational arg as it causes the drt to seg fault
-set ::env(OUTPUT_CLOCK_0) "dephase_clk_0"
-set ::env(OUTPUT_CLOCK_1) "dephase_clk_1"
-create_generated_clock -name $::env(OUTPUT_CLOCK_0) -source [get_ports $::env(CLOCK_PORT)] -master_clock [get_clocks $::env(CLOCK_PORT)] -divide_by 1 -invert $mux_clk_pin -add
-create_generated_clock -name $::env(OUTPUT_CLOCK_1) -source [get_ports $::env(CLOCK_PORT)] -master_clock [get_clocks $::env(CLOCK_PORT)] -divide_by 1 $mux_clk_pin -add
+set ::env(OUTPUT_CLOCK_0) "dephase_clk_1"
+# not a typo:
+set ::env(OUTPUT_CLOCK_1) "dephase_clk_1" 
+# double generated clock from same source not supported by openraod cts 
+#create_generated_clock -name $::env(OUTPUT_CLOCK_0) -source [get_ports $::env(CLOCK_PORT)] -master_clock [get_clocks $::env(CLOCK_PORT)] -combinational -invert $ref_clk_mux_pin -add 
+create_generated_clock -name $::env(OUTPUT_CLOCK_1) -source [get_ports $::env(CLOCK_PORT)] -master_clock [get_clocks $::env(CLOCK_PORT)] -combinational -invert $ref_clk_mux_pin -add
 set_clock_groups -logically_exclusive -group $::env(OUTPUT_CLOCK_0) -group $::env(OUTPUT_CLOCK_1)
+
+puts "$::env(OUTPUT_CLOCK_1) is used to drive dff's via pins: [get_all_dff_clk_port $::env(OUTPUT_CLOCK_1)]"
 
 set_propagated_clock [all_clocks]
 
+report_clock_properties [all_clocks]
 
 set ::env(PHY_RX_PINS) {ui_in[0] ui_in[1] ui_in[2] ui_in[3]}
 set ::env(PHY_TX_PINS) {uo_out[0] uo_out[1] uo_out[2]}
