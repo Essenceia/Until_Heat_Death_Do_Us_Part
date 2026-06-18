@@ -35,7 +35,7 @@ set ::env(OUTPUT_CLOCK_0) "dephase_clk_1"
 set ::env(OUTPUT_CLOCK_1) "dephase_clk_1" 
 # double generated clock from same source not supported by openraod cts 
 #create_generated_clock -name $::env(OUTPUT_CLOCK_0) -source [get_ports $::env(CLOCK_PORT)] -master_clock [get_clocks $::env(CLOCK_PORT)] -combinational -invert $ref_clk_mux_pin -add 
-create_generated_clock -name $::env(OUTPUT_CLOCK_1) -source [get_ports $::env(CLOCK_PORT)] -master_clock [get_clocks $::env(CLOCK_PORT)] -combinational -invert $ref_clk_mux_pin -add
+create_generated_clock -name $::env(OUTPUT_CLOCK_1) -source [get_ports $::env(CLOCK_PORT)] -master_clock [get_clocks $::env(CLOCK_PORT)] -combinational $ref_clk_mux_pin -add
 set_clock_groups -logically_exclusive -group $::env(OUTPUT_CLOCK_0) -group $::env(OUTPUT_CLOCK_1)
 
 puts "$::env(OUTPUT_CLOCK_1) is used to drive dff's via pins: [get_all_dff_clk_port $::env(OUTPUT_CLOCK_1)]"
