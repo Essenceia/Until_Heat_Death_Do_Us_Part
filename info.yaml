@@ -1,9 +1,9 @@
 # Tiny Tapeout project information
 project:
-  title:        "Teapot server"      # Project title
+  title:        "100Mbps Ethernet Accelerator Wrapper"      # Project title
   author:       "Julia Desmazes"      # Your name
   discord:      "essen__"      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "Network connected accelerator concept."      # One line description of what your project does
+  description:  "Network connected accelerator wrapper, connected to custom bfloat16 multiplier."      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     50000000       # Clock frequency in Hz (or 0 if not applicable)
 
