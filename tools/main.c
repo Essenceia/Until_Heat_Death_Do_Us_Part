@@ -21,7 +21,7 @@ int main(int argc, char * argv[]){
 	mac_addr_t device_mac_addr;
 	mac_addr_t asic_mac_addr = DEFAULT_ASIC_MAC;
 
-	if (argc < 2 && argc > 3){
+	if (argc < 2 || argc > 3){
 		printf("Usage: %s eth_intf [asic_mac_addr]\nGot %d(%d) arguments\n", argv[0],argc - 1, argc);
 		return -1;
 	}
