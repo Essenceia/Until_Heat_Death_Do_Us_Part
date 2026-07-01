@@ -12,12 +12,12 @@ a hidden easter eggs.
 No need to be scared, the sun will have engulfed our feable planet long before the counter overflows. 
 
 Assuming the big freeze arrives in $10^{100}$ years and we are operating at 50Mhz, we have: 
-- $50*10^{6}$ ticks per second
-- $50*10^{6}*60*60*24$ ticks per day
-- $50*10^{6}*60*60*24*365.25$ ticks per year
-- $50*10^{6}*60*60*24*365.25*10^{100}$ ticks until the big freeze
+- $`50*10^{6}`$ ticks per second
+- $`50*10^{6}*60*60*24`$ ticks per day
+- $`50*10^{6}*60*60*24*365.25`$ ticks per year
+- $`50*10^{6}*60*60*24*365.25*10^{100}`$ ticks until the big freeze
 
-So we need a $clog_2(50*10^{6}*60*60*24*365.25*10^{100})$ sized counter.
+So we need a $`\log_2(50*10^{6}*60*60*24*365.25*10^{100})`$ sized counter.
 
 # 100Mbps Ethernet 
 
