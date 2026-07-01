@@ -1,47 +1,51 @@
-# Teapot Project
+# Counting until the heat death of the universe
 
-100Mbps Ethernet wrapper for hardware accelerators. 
+ASIC with a large enogth counter to theoretically counts until the heat death of the the universe. 
+Counter value is incremented ever 20ns and every second it will broadcasts an ethernet frame over 100Mbps ethernet
+with the current counters value, not that anyone is going to be listening for long anyways. 
 
-![overview](/docs/overview.svg)
+Assuming the universe dies in approximatively $10^{100}$ years. If you are patient enogth to wait until then there is 
+a hidden easter eggs.  
 
-This project creates an ethernet interface for a generic hardware accelerator applications and handles 
-ethernet frame streamin and out of input and output data. 
+# Doomsday counter 
+
+No need to be scared, the sun will have engulfed our feable planet long before the counter overflows. 
+
+Assuming the big freeze arrives in $10^{100}$ years and we are operating at 50Mhz, we have: 
+- $50*10^{6}$ ticks per second
+- $50*10^{6}*60*60*24$ ticks per day
+- $50*10^{6}*60*60*24*365.25$ ticks per year
+- $50*10^{6}*60*60*24*365.25*10^{100}$ ticks until the big freeze
+
+So we need a $clog_2(50*10^{6}*60*60*24*365.25*10^{100})$ sized counter.
+
+# 100Mbps Ethernet 
+
+This project is re-using the [Teapot Ethernet accelerator wrapper](https://github.com/Essenceia/Teapot) for communicating
+over 100Mbps Ethernet using a CAT-3/5 cable in full-duplex mode. Here is to hopeing someone still remeber how to 
+talk Ethernet until then.  
 
 ## Ethernet packets
 
 This wrapper workes with layer 2 ethernet packets, opperating at the level of the ethernet frame. It support two 
 types of packets: 
-- `application packets` whos payload is passed to the accelerator
-- `configuration packets` used to set the ASICs MAC address, Vlan IDentifier, and the TX phase selection
+- `application packets, ethtype = 0x88B5` sent by the accelerator
+- `configuration packets, ethtype = 0x88B6` used to set the ASICs MAC address, Vlan IDentifier, and the TX phase selection
 
 All packets whos destination MAC do not match the ASIC's current MAC address will be filtered out.
 Unless otherwise specified the ASIC's MAC address is `00:90:CF:00:BE:EF` (read as Nortel:BEEF).
  
 ### Application packets
 
-The application packet payload is streamed to the accelerator though the application wrapper. 
-In the case of this design, the accelerator is a custom bfloat16 multiplier, so the payload will 
-contain the two 16 bit values `A` and `B` we wish to multiply. 
-
-**Request**
-```
-[ dst mac (6 Bytes) ][ src mac (6 Bytes) ][ ethtype = 0x88B5 (2 Bytes) ][ A (2 Bytes) ][ B (2 Bytes) ][ padding (42 Bytes) ][ FCS (4 Bytes) ] 
-0
-```
-
-The result of the accelerator's computation, here `C=A*B`, will be contained in the payload of the response packet addressed to the
-`src mac` of the original request packet. 
+The end of the universe counter does not listen to any incomming packets (we are all going to be dead soon anyways) 
+and broadcasts the current counter value every second. 
 
 **Response**
 ```
-[ dst mac (6 Bytes) ][ src mac (6 Bytes) ][ ethtype = 0x88B5 (2 Bytes) ][ C (2 Bytes) ][ padding (44 Bytes) ][ FCS (4 Bytes) ] 
+[ dst mac (6 Bytes) FF:FF:FF:FF:FF:FF ][ src mac (6 Bytes) ][ ethtype = 0x88B5 (2 Bytes) ][ C (2 Bytes) ][ padding (44 Bytes) ][ FCS (4 Bytes) ] 
 0
 ```
-
-Response packet streamout will start as soon as the last bits of `B` are received, for area reasons, the ASIC will not 
-check for corrupted FCS or if the ethernet frame length complies with the 802.3 spec. 
-
-Unless otherwise configured application packets use ethertype `0x88B5`, the first IEEE 802.3 specified "Local Experimental Ethertype".
+Counter values are sent in big endian.
 
 ### Configuration packets
 
@@ -114,15 +118,6 @@ The MAC will filter out all unicast packets not matching the configured
 destination MAC address. This implies that all broadcast and multicast 
 packets will be forwarded. 
 
-## Improvements 
-
-List of potenciel future improvements :
-- 10Mbps support with dynamic switching between 100Mbps and 10Mbps
-- Adding VLAN tagging to responses from VLAN tagged packets 
-- Make the wrapper easy to import into a third party project
-- Add perf counters and expose said counters over JTAG 
-- Management data to JTAG bridge ? (MDIO/MDC)
-
 ## Credits
 
-Thanks to the Tiny Tapeout project, its contributors, and all the community working on open source silicon tools for making this possible.
+Thanks to `thegreatpotatogod` on reddit for inspiring me with such a terrible ides, the Tiny Tapeout project, its contributors, and all the community working on open source silicon tools for making this possible.
