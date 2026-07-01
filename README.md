@@ -80,6 +80,7 @@ Default VLAN ID: `0xDAD`
 ## Configuration pins
 
 ##### TX data to reference clock phase offset
+
 To comphensate for the output data to reference clock offset induced by the delay on the path from the clock 
 input pin, to the tiny tapeout design's data out flip-flop and back to the output pin, the reference 
 clock for the data out flip flop is selectable, allowing us to use a 180 degree dephased reference clock. 
