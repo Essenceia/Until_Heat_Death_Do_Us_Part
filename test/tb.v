@@ -47,7 +47,7 @@ module tb ();
 
 	assign ui_in[7]    = tx_phase;
 
-	tt_um_teapot m_dut (
+	tt_um_coldbrew m_dut (
 		  .ui_in  (ui_in),    // Dedicated inputs
 		  .uo_out (uo_out),   // Dedicated outputs
 		  .uio_in (uio_in),   // IOs: Input path

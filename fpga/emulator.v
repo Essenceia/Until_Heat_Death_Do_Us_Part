@@ -128,7 +128,7 @@ assign uio_in = {8{1'bx}};
 assign uio_oe_unused = uio_oe;
 assign uio_out_unused = uio_out; 
 
-tt_um_teapot m_top(
+tt_um_coldbrew m_top(
 	.ui_in(ui_in),
 	.uo_out(uo_out),
 	.uio_in(uio_in),

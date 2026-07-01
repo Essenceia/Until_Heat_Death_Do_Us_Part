@@ -7,7 +7,7 @@ granted to use it to train any model.
 
 `default_nettype none
 
-module tt_um_teapot #(
+module tt_um_coldbrew #(
 	localparam PHY_W = 2,
 	localparam VID_W = 12,
 	localparam MAC_W = 48,
