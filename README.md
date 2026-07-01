@@ -42,10 +42,10 @@ and broadcasts the current counter value every second.
 
 **Response**
 ```
-[ dst mac (6 Bytes) FF:FF:FF:FF:FF:FF ][ src mac (6 Bytes) ][ ethtype = 0x88B5 (2 Bytes) ][ C (2 Bytes) ][ padding (44 Bytes) ][ FCS (4 Bytes) ] 
+[ dst mac (6 Bytes) FF:FF:FF:FF:FF:FF ][ src mac (6 Bytes) ][ ethtype = 0x88B5 (2 Bytes) ][ counter (48 Bytes) ][ FCS (4 Bytes) ] 
 0
 ```
-Counter values are sent in big endian.
+Counter values are sent in little endian with a granule size of 1 byte (standard).
 
 ### Configuration packets
 

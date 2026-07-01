@@ -8,74 +8,43 @@ granted to use it to train any model.
 `default_nettype none
 
 /* 
-Application example: floating point multiplication
-Since data without the proper dst address and ethertype
-if filtered out we are not adding a magic number check.
+Counting until the heat death of the universe, broadcasting 
+counter value over an ethernet frame every 1 second (more of less 1.3 ms).
+
+No need to check tx accept since we will be sending only 1 packet every 
+second, clearly no risk of violating the ethernet IPG. 
 */
 module app_wrapper #(
 	parameter PHY_W = 2,
-	localparam MAC_W = 48 
+	localparam FREQ_HZ = 50000000;
+	localparam MAC_W = 48, 
+	localparam [MAC_W-1:0] BROADCAST_ADDR = 48'hFFFFFFFFFFFF
 )(
 	input wire clk, 
 	input wire rst_n, 
 
-	input wire             data_v_i,
-	input wire             data_conf_i,
-	input wire             data_start_i,
-	input wire             data_err_i,
-	input wire [PHY_W-1:0] data_i,
-	input wire [MAC_W-1:0] data_src_mac_i, 
-
 	output wire             mac_tx_v_o,// request and valid
 	output wire             mac_tx_last_o,
-	input wire              mac_tx_acc_i, // accept
 	output wire [PHY_W-1:0] mac_tx_o,
 	output wire [MAC_W-1:0] mac_tx_dst_mac_o// guarantied to not change until packet header has finished sending
 );
-localparam PKT_DATA_W       = 32;
-localparam PKT_DATA_CNT_VAL = (PKT_DATA_W/PHY_W) - 1;
-localparam PKT_DATA_CNT_W   = $clog2(PKT_DATA_CNT_VAL);
-/* verilator lint_off WIDTHTRUNC */
-localparam [PKT_DATA_CNT_W-1:0] PKT_DATA_CNT = PKT_DATA_CNT_VAL;
-/* verilator lint_on WIDTHTRUNC */
+localparam DD_CNT_BYTES_W = 48; // death of the universe counter width
+localparam DD_CNT_W = DD_CNT_BYTES_W * 8; 
+localparam INTER_CNT_W = 16;
+localparam INTER_CNT_N = DD_CNT_W / INTER_CNT_W; // number of cascading intermediary counters
 
-/* Ethernet frame payload body : 
-[ multiplicacant (A) [15:0] ][ multiplier (B) [15:0] ][ padding [351:0] ]
-0                           15                       31               383
-*/
-reg  [PKT_DATA_W-1:0]     payload_q;
-wire [PKT_DATA_W-1:0]     swap_payload;
-reg  [PKT_DATA_CNT_W-1:0] rx_cnt_q; 
+// 1s update pending trigger
+wire send_tx_req; 
+wire stream_start; 
 
-/* RX 
-rx fsm */
-localparam RX_IDLE  = 2'b00; 
-localparam RX_DATA  = 2'b01; 
-localparam RX_READY = 2'b10;
-reg [1:0] rx_fsm_q;
+broadcast_timer m_1s_timer(
+	.clk(clk), 
+	.rst_n(rst_n),
+	.update_finished_i(stream_start),
+	.update_req_o(send_tx_req)
+);
 
-always @(posedge clk) begin
-	if (~rst_n | (data_v_i & data_err_i)) 
-		rx_fsm_q <= RX_IDLE; 
-	else begin
-		case(rx_fsm_q)
-			RX_IDLE : rx_fsm_q <= data_start_i & ~data_conf_i? RX_DATA: RX_IDLE;
-			RX_DATA : rx_fsm_q <= rx_cnt_q == PKT_DATA_CNT ? RX_READY: RX_DATA;
-			RX_READY: rx_fsm_q <= RX_IDLE; 
-			default : rx_fsm_q <= RX_IDLE;
-		endcase
-	end
-end
-always @(posedge clk) 
-	if (~rst_n | data_start_i) rx_cnt_q <= {PKT_DATA_CNT_W{1'b0}};
-	else rx_cnt_q <= rx_cnt_q + {{PKT_DATA_CNT_W-1{1'b0}}, 1'b1}; 
-
-always @(posedge clk) 
-	if (rx_fsm_q == RX_DATA) payload_q <= {data_i , payload_q[PKT_DATA_W-1:PHY_W]}; 
-
-byteswap #(.W(PKT_DATA_W/8)) m_swap_payload(.i(payload_q), .o(swap_payload));
-
-/* accelerator */
+/* cold freeze counter */
 
 // TODO 
 wire [15:0] mul_res;
@@ -84,30 +53,37 @@ assign mul_res = {16{1'b0}};
 
 /* TX 
 
-streamed out packet, added padding to make this a legal ethernet frame: 
-[ multiplication result [15:0] ][ padding [367:0] ]
-0                              15               383
+streamed out packet, no need to add padding to make this a legal ethernet frame: 
+[ counter 48 bytes ]
+0                383 
 
-padding will be all 0's
+[ inter 0 16b ][ inter 1 16b ][ inter 2 16b ]     ... [ inter 23 16b ]
+0             15             31             47                     383
+ 
+intermediary counters follow little endian with a granule size of 1 contention, eg with
+inter 0:      
+[ inter 0 [7:0] 8b ][ inter 0 [15:8] 8b]
+0                  7                  15
+
+this is accomplished by the byteswap module
 */
-localparam ETH_FRAME_MIN_W = 46*8;
+localparam ETH_FRAME_MIN_W = DD_CNT_W;
 localparam FRAME_CNT_VAL   = (ETH_FRAME_MIN_W/PHY_W)-1;
 localparam FRAME_CNT_W     = $clog2(FRAME_CNT_VAL);
-localparam RES_W           = 16;
+localparam BUF_W           = INTER_CNT_W;
 /* verilator lint_off WIDTHTRUNC */
 localparam [FRAME_CNT_W-1:0]   FRAME_CNT   = FRAME_CNT_VAL;
 /* verilator lint_on WIDTHTRUNC */
 
 // tx fsm 
 localparam TX_IDLE    = 2'b00;
-localparam TX_CAPTURE = 2'b01;
-localparam TX_REQ     = 2'b10;
+localparam TX_PENDING = 2'b01;
 localparam TX_STREAM  = 2'b11;
 
 reg  [1:0] tx_fsm_q;
 reg  [FRAME_CNT_W-1:0] tx_cnt_q;
-wire [RES_W-1:0] swap_mul_res;
-reg  [RES_W-1:0] res_q;
+wire [BUF_W-1:0] swap_buf_next;
+reg  [BUF_W-1:0] buf_q;
  
 always @(posedge clk) begin
 	if (~rst_n) 
@@ -126,16 +102,16 @@ always @(posedge clk)
 	if (tx_fsm_q == TX_REQ) tx_cnt_q <= {FRAME_CNT_W{1'b0}};
 	else if (mac_tx_acc_i) tx_cnt_q <= tx_cnt_q + {{FRAME_CNT_W-1{1'b0}}, 1'b1};
 
-byteswap #(.W(RES_W/8)) m_swap_mul_res(.i(mul_res), .o(swap_mul_res));
+byteswap #(.W(BUF_W/8)) m_swap_mul_res(.i(mul_res), .o(swap_buf_next));
 
 always @(posedge clk) 
-	if (tx_fsm_q == TX_CAPTURE) res_q <= swap_mul_res;
-	else if (tx_fsm_q == TX_STREAM) res_q <= {{PHY_W{1'b0}}, res_q[RES_W-1:PHY_W]}; // padd with 0s
+	if (tx_fsm_q == TX_CAPTURE) buf_q <= swap_buf_next;
+	else if (tx_fsm_q == TX_STREAM) buf_q <= {{PHY_W{1'b0}}, buf_q[BUF_W-1:PHY_W]}; // padd with 0s
 
 assign mac_tx_v_o = (tx_fsm_q == TX_REQ) | (tx_fsm_q == TX_STREAM);
 assign mac_tx_last_o = (tx_fsm_q == TX_STREAM) & (tx_cnt_q == FRAME_CNT);
-assign mac_tx_o = res_q[PHY_W-1:0];
-assign mac_tx_dst_mac_o = data_src_mac_i;
+assign mac_tx_o = buf_q[PHY_W-1:0];
+assign mac_tx_dst_mac_o = BROADCAST_ADDR;
 
 endmodule
 
