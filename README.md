@@ -5,7 +5,7 @@ Counter value is incremented ever 20ns and every second it will broadcasts an et
 with the current counters value, not that anyone is going to be listening for long anyways. 
 
 Assuming the universe dies in approximatively $10^{100}$ years. If you are patient enogth to wait until then there is 
-a hidden easter egg when we overflow.  
+a hidden easter egg when we eventually overflow.  
 
 # Doomsday counter 
 
