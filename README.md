@@ -17,7 +17,7 @@ Assuming the big freeze arrives in $10^{100}$ years and we are operating at 50Mh
 - $`50*10^{6}*60*60*24*365.25`$ ticks per year
 - $`50*10^{6}*60*60*24*365.25*10^{100}`$ ticks until the big freeze
 
-So we need a $`\log_2(50*10^{6}*60*60*24*365.25*10^{100})`$ sized counter.
+So we need a $`\log_2(50*10^{6}*60*60*24*365.25*10^{100}) = 382.679718 \approx 383`$ sized counter.
 
 # 100Mbps Ethernet 
 
