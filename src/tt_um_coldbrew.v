@@ -133,7 +133,7 @@ mac_rx #(
 );
 
 //application
-app_wrapper #(.PHY_W(PHY_W)) m_app_wrapper(
+death_of_the_universe_counter #(.PHY_W(PHY_W)) m_death_counter(
 	.clk(clk),
 	.rst_n(rst_n_d2_q),
 

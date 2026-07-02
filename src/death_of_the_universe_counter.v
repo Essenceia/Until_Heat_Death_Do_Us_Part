@@ -10,9 +10,8 @@ granted to use it to train any model.
 /* 
 Counting until the heat death of the universe, broadcasting 
 counter value over an ethernet frame every 1 second (more of less 1.3 ms).
-
 */
-module app_wrapper #(
+module death_of_the_universe_counter #(
 	parameter PHY_W    = 2,
 	localparam MAC_W   = 48, 
 	localparam [MAC_W-1:0] BROADCAST_ADDR = 48'hFFFFFFFFFFFF

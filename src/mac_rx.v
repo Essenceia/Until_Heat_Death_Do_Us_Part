@@ -58,8 +58,6 @@ localparam [FRAME_TYPE_W-1:0] TYPE_VLAN = 16'h8100;
 // FCS 
 localparam FCS_W = 32; 
 
-localparam DELAY_DEPTH = (FCS_W /PHY_W) + 1;
-
 // fsm 
 localparam IDLE       = 4'd0; 
 localparam DETECT_SFD = 4'd1;

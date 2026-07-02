@@ -18,7 +18,7 @@ project:
   # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
   source_files:
     - "tt_um_coldbrew.v"
-    - "app_wrapper.v"
+    - "death_of_the_universe_count.v"
     - "crc_8.v"
     - "mac_conf.v"
     - "mac_rx.v"
