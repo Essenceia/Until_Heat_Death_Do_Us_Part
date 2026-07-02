@@ -13,9 +13,8 @@ counter value over an ethernet frame every 1 second (more of less 1.3 ms).
 
 */
 module app_wrapper #(
-	parameter PHY_W = 2,
-	localparam FREQ_HZ = 50000000;
-	localparam MAC_W = 48, 
+	parameter PHY_W    = 2,
+	localparam MAC_W   = 48, 
 	localparam [MAC_W-1:0] BROADCAST_ADDR = 48'hFFFFFFFFFFFF
 )(
 	input wire clk, 
@@ -47,14 +46,18 @@ broadcast_timer m_1s_timer(
 
 reg  [INNER_CNT_W-1:0] inner_cnt_q[INNER_CNT_N-1:0];
 wire [INNER_CNT_W-1:0] inner_cnt_next[INNER_CNT_N-1:0];
-reg  [INNER_CNT_N-1:0] inner_cnt_overflow_q;
 wire [INNER_CNT_N-1:0] inner_cnt_overflow_next;
+reg  [INNER_CNT_N-1:0] inner_cnt_overflow_q;
+/* verilator lint_off UNUSEDSIGNAL */
+wire its_dead_jim; 
+/* verilator lint_on UNUSEDSIGNAL */
+
 genvar i; 
 // 0
 assign {inner_cnt_overflow_next[0], inner_cnt_next[0]} = inner_cnt_q[0] + {{INNER_CNT_W-1{1'b0}}, 1'b1};
 generate
 	for(i = 1; i < INNER_CNT_N; i=i+1) begin: g_counter_add
-		assign {inner_cnt_overflow_next[i], inner_cnt_next[i]} = inner_cnt_q[i] + inner_cnt_overflow_q[i-1];
+		assign {inner_cnt_overflow_next[i], inner_cnt_next[i]} = inner_cnt_q[i] + {{INNER_CNT_W-1{1'b0}}, inner_cnt_overflow_q[i-1]};
 	end
 	for(i = 0; i < INNER_CNT_N; i=i+1) begin: g_inner_ff
 		always @(posedge clk) 
@@ -66,6 +69,8 @@ endgenerate
 // start stream when lower counter overflows, guaranties increment will have time to ripple though the 
 // counter segments we are streaming out 
 assign stream_start = inner_cnt_overflow_q[0];
+
+assign its_dead_jim = inner_cnt_overflow_q[INNER_CNT_N-1];
 
 /* TX 
 
@@ -88,7 +93,7 @@ localparam BUF_CNT_VAL     = (BUF_W/PHY_W)-1;
 localparam BUF_CNT_W       = $clog2(BUF_CNT_VAL);
 /* verilator lint_off WIDTHTRUNC */
 localparam [BUF_CNT_W-1:0] BUF_CNT = BUF_CNT_VAL;
-/* verilator lint_in WIDTHTRUNC */
+/* verilator lint_on WIDTHTRUNC */
 
 // number of buffers of inner counter parts to stream out 
 localparam INNER_BUF_CNT_W  = $clog2(INNER_CNT_N);
@@ -109,8 +114,8 @@ reg  [1:0] tx_fsm_q;
 reg  [BUF_CNT_W-1:0]       buf_cnt_q;
 reg  [INNER_BUF_CNT_W-1:0] inner_buf_cnt_q;
 
-wire [BUF_W-1:0] buf_inner_next;
-reg  [BUF_W-1:0] buf_next;
+reg  [BUF_W-1:0] buf_inner_next;
+wire [BUF_W-1:0] buf_next;
 wire [BUF_W-1:0] swap_buf_next;
 reg  [BUF_W-1:0] buf_q;
 reg              buf_cnt_overflow_q;
@@ -121,7 +126,7 @@ always @(posedge clk) begin
 	else begin
 		case(tx_fsm_q)
 			TX_IDLE   : tx_fsm_q <= send_tx_req ? TX_PENDING: TX_IDLE;
-			TX_PENDING: tx_fsm_q <= mac_tx_acc_i? TX_STREAM: TX_REQ;
+			TX_PENDING: tx_fsm_q <= mac_tx_acc_i? TX_STREAM: TX_MAGIC;
 			TX_MAGIC  : tx_fsm_q <= buf_cnt_overflow_q ? TX_STREAM: TX_MAGIC;
 		    TX_STREAM : tx_fsm_q <= (inner_buf_cnt_q == INNER_BUF_CNT) ? TX_IDLE: TX_STREAM;	
 		endcase
@@ -167,7 +172,7 @@ always @(*) begin
         default: buf_inner_next = {INNER_CNT_W{1'bX}};
     endcase
 end
-assign buf_next = tx_fsm_q == TX_MAGIC ? MAGIC_NUMBER : buf_inner_next; 
+assign buf_next = tx_fsm_q == TX_PENDING ? MAGIC_NUMBER : buf_inner_next; 
 byteswap #(.W(BUF_W/8)) m_swap_mul_res(.i(buf_next), .o(swap_buf_next));
 
 always @(posedge clk) 
@@ -175,7 +180,7 @@ always @(posedge clk)
 	else buf_q <= {{PHY_W{1'b0}}, buf_q[BUF_W-1:PHY_W]}; // padd with 0s
 
 assign mac_tx_v_o = (tx_fsm_q != TX_IDLE);
-assign mac_tx_last_o = (tx_fsm_q == TX_STREAM) & (inner_buf_cnt_q == FRAME_CNT);
+assign mac_tx_last_o = (tx_fsm_q == TX_STREAM) & (inner_buf_cnt_q == INNER_BUF_CNT);
 assign mac_tx_o = buf_q[PHY_W-1:0];
 assign mac_tx_dst_mac_o = BROADCAST_ADDR;
 

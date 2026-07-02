@@ -36,7 +36,6 @@ wire        data_rx_conf;
 wire        data_rx_start;
 wire        data_rx_err;
 wire [PHY_W-1:0] data_rx;
-wire [MAC_W-1:0] data_rx_src_mac; 
 
 wire             rmii_tx_v; 
 wire [PHY_W-1:0] rmii_tx;
@@ -131,20 +130,15 @@ mac_rx #(
 	.data_start_o(data_rx_start),
 	.data_err_o(data_rx_err),
 	.data_o(data_rx),
-	.data_src_mac_o(data_rx_src_mac)
+/* verilator lint_off PINCONNECTEMPTY */
+	.data_src_mac_o()
+/* verilator lint_on PINCONNECTEMPTY */
 );
 
 //application
 app_wrapper #(.PHY_W(PHY_W)) m_app_wrapper(
 	.clk(clk),
 	.rst_n(rst_n_d2_q),
-
-	.data_v_i      (data_rx_v),
-	.data_conf_i   (data_rx_conf),
-	.data_start_i  (data_rx_start),
-	.data_err_i    (data_rx_err),
-	.data_i        (data_rx),
-	.data_src_mac_i(data_rx_src_mac),
 
 	.mac_tx_v_o      (mac_tx_v),
 	.mac_tx_last_o   (mac_tx_last),

@@ -52,6 +52,12 @@ async def rst(dut, ena=1 ):
 async def send_frame(dut, rx: mac_utils.eth_frame):
 	await mac_utils.phy_stream_frame(dut, rx.raw())
 
+async def read_frame(dut): 
+	tx_frame = await mac_utils.read_tx_frame(dut)
+	gotten = tx_frame.tobytes().hex()
+	cocotb.log.info(f"tx {gotten}")
+
+
 async def send_and_check_frames(dut, rx: mac_utils.eth_frame, device_mac = mac_utils.DEFAULT_DEVICE_MAC):
 	tx_sent, tx = mac_utils.expected_response(rx, device_mac)
 	if tx_sent: 
@@ -74,21 +80,12 @@ async def send_and_check_frames(dut, rx: mac_utils.eth_frame, device_mac = mac_u
 			assert(0)
 
 # Simple test 
-@cocotb.test(expect_error=AssertionError if GATES == "yes" else ())
-async def simple_rx_test(dut):
+@cocotb.test()
+async def simple_tx_test(dut):
 	random.seed(0)
 	await rst(dut) 
-	for _ in range(0, 10):
-		await send_and_check_frames(dut, mac_utils.simple_frame())	
-	await ClockCycles(dut.clk, 10)
-
-@cocotb.test(expect_error=AssertionError if GATES == "yes" else ())
-async def filter_rx_test(dut):
-	random.seed(0)
-	await rst(dut)
 	for _ in range(0,10):
-		await send_and_check_frames(dut, mac_utils.test_filtered_packets())
-	await ClockCycles(dut.clk, 10)
+		await read_frame(dut)
 
 @cocotb.test(skip=True if GATES == "yes" else False)
 async def update_eth_config(dut):
@@ -104,18 +101,5 @@ async def update_eth_config(dut):
 		assert dut_mac == config.addr, f"missmatch mac config, config sent {config} got addr {dut_mac.hex()}"
 		assert dut_vid == config.vid, f"missmatch vid config, config sent {config} got vid {dut_vid.hex()} raw {dut.m_dut.vid.value}"
 		device_mac = new_mac
-	await ClockCycles(dut.clk, 10)
-
-@cocotb.test(expect_error=AssertionError if GATES == "yes" else ())
-async def update_mac_check_filter(dut):
-	random.seed(0)
-	await rst(dut)
-	device_mac = mac_utils.DEFAULT_DEVICE_MAC
-	for _ in range(0, 10):
-		new_mac = random.randbytes(6) 
-		frame,config = mac_utils.simple_config(dst_mac = device_mac, new_mac = new_mac)
-		await send_frame(dut, rx = frame)
-		device_mac = new_mac 
-		await send_and_check_frames(dut, mac_utils.test_filtered_packets(dst_mac = device_mac), device_mac = device_mac)	
 	await ClockCycles(dut.clk, 10)
 
