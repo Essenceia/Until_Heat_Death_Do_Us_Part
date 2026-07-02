@@ -106,16 +106,17 @@ localparam [BUF_CNT_W-1:0] BUF_CNT = BUF_CNT_VAL;
 /* verilator lint_on WIDTHTRUNC */
 
 // number of buffers of inner counter parts to stream out 
-localparam INNER_BUF_CNT_W  = $clog2(INNER_CNT_N);
+localparam SEG_CNT_W  = $clog2(INNER_CNT_N);
 /* verilator lint_off WIDTHTRUNC */
-localparam [INNER_BUF_CNT_W-1:0]  INNER_BUF_CNT = INNER_CNT_N - 1;
+localparam [SEG_CNT_W-1:0]  SEG_CNT = INNER_CNT_N - 1;
 /* verilator lint_on WIDTHTRUNC */
 
 localparam [BUF_W-1:0] MAGIC_NUMBER = 16'hCAFE;
 
 // tx fsm 
-reg  [BUF_CNT_W-1:0]       buf_cnt_q;
-reg  [INNER_BUF_CNT_W-1:0] inner_buf_cnt_q;
+reg  [BUF_CNT_W-1:0] buf_cnt_q;
+reg  [SEG_CNT_W-1:0] seg_cnt_q;
+wire [SEG_CNT_W-1:0] buf_inner_next_sel;
 
 reg  [BUF_W-1:0] buf_inner_next;
 wire [BUF_W-1:0] buf_next;
@@ -131,7 +132,7 @@ always @(posedge clk) begin
 			TX_IDLE   : tx_fsm_q <= send_tx_req & stream_start ? TX_PENDING: TX_IDLE;
 			TX_PENDING: tx_fsm_q <= mac_tx_acc_i? TX_MAGIC: TX_PENDING;
 			TX_MAGIC  : tx_fsm_q <= (buf_cnt_q == BUF_CNT) ? TX_STREAM: TX_MAGIC;
-		    TX_STREAM : tx_fsm_q <= (inner_buf_cnt_q == INNER_BUF_CNT) & buf_cnt_overflow_q ? TX_IDLE: TX_STREAM;	
+		    TX_STREAM : tx_fsm_q <= (seg_cnt_q == SEG_CNT) & buf_cnt_overflow_q ? TX_IDLE: TX_STREAM;	
 		endcase
 	end
 end
@@ -141,13 +142,13 @@ always @(posedge clk)
 	else {buf_cnt_overflow_q, buf_cnt_q} <= buf_cnt_q + {{BUF_CNT_W-1{1'b0}}, 1'b1};
 
 always @(posedge clk) 
-	if (tx_fsm_q == TX_MAGIC | ~rst_n) inner_buf_cnt_q <= {INNER_BUF_CNT_W{1'b0}};
-	else inner_buf_cnt_q <= inner_buf_cnt_q + {{INNER_BUF_CNT_W-1{1'b0}}, buf_cnt_overflow_q};
+	if (tx_fsm_q == TX_MAGIC | ~rst_n) seg_cnt_q <= {SEG_CNT_W{1'b0}};
+	else seg_cnt_q <= seg_cnt_q + {{SEG_CNT_W-1{1'b0}}, buf_cnt_overflow_q};
 
 // I am not proud of this but this is still cheaper than have a shift register
 // being explicit about default case, not making any assumptions on synth, to dangerous
 always @(*) begin
-    case(inner_buf_cnt_q)
+    case(seg_cnt_q)
         5'd0:    buf_inner_next = inner_cnt_q[0];
         5'd1:    buf_inner_next = inner_cnt_q[1];
         5'd2:    buf_inner_next = inner_cnt_q[2];
@@ -183,7 +184,7 @@ always @(posedge clk)
 	else buf_q <= {{PHY_W{1'b0}}, buf_q[BUF_W-1:PHY_W]}; // padd with 0s
 
 assign mac_tx_v_o = (tx_fsm_q != TX_IDLE);
-assign mac_tx_last_o = (tx_fsm_q == TX_STREAM) & (inner_buf_cnt_q == INNER_BUF_CNT) & buf_cnt_overflow_q;
+assign mac_tx_last_o = (tx_fsm_q == TX_STREAM) & (seg_cnt_q == SEG_CNT) & buf_cnt_overflow_q;
 assign mac_tx_o = buf_q[PHY_W-1:0];
 assign mac_tx_dst_mac_o = BROADCAST_ADDR;
 
