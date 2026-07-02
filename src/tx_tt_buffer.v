@@ -41,7 +41,17 @@ always @(posedge ref_clk)
 
 assign ref_clk_inv = ~ref_clk;
 assign ref_clk_buf = ref_clk;
+
+`ifdef SCL_gf180mcu_fd_sc_mcu7t5v0
+gf180mcu_fd_sc_mcu7t5v0__mux2_2 m_ref_clk_mux(
+	.I0(ref_clk_inv),
+	.I1(ref_clk),
+	.S(clk_phase_sel_q),
+	.Z(inner_clk)
+);
+`else
 assign inner_clk = clk_phase_sel_q ? ref_clk_inv: ref_clk_buf; 
+`endif
 
 always @(posedge inner_clk) begin
 	tx_v_q <= tx_v_i; 
