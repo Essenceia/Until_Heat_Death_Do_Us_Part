@@ -116,7 +116,6 @@ localparam [BUF_W-1:0] MAGIC_NUMBER = 16'hCAFE;
 // tx fsm 
 reg  [BUF_CNT_W-1:0] buf_cnt_q;
 reg  [SEG_CNT_W-1:0] seg_cnt_q;
-wire [SEG_CNT_W-1:0] buf_inner_next_sel;
 
 reg  [BUF_W-1:0] buf_inner_next;
 wire [BUF_W-1:0] buf_next;

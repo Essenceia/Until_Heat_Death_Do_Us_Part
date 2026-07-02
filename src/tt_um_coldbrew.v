@@ -25,8 +25,8 @@ module tt_um_coldbrew #(
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
 );
-reg rst_n_d1_q;
-reg rst_n_d2_q; 
+reg       rst_n_d1_q;
+reg [1:0] rst_n_d2_q; 
 
 wire [VID_W-1:0] vid; 
 wire [MAC_W-1:0] mac_addr;
@@ -84,14 +84,15 @@ assign ena_unused = ena;
 
 // rst flop, only used sequentially 
 always @(posedge clk) begin
-	rst_n_d1_q <= rst_n;
-	rst_n_d2_q <= rst_n_d1_q;
+	rst_n_d1_q    <= rst_n;
+	rst_n_d2_q[0] <= rst_n_d1_q;
+	rst_n_d2_q[1] <= rst_n_d1_q;
 end
 
 // rmii 
 rmii m_rmii(
 	.clk(clk),
-	.rst_n(rst_n_d2_q),
+	.rst_n(rst_n_d2_q[0]),
 
 	.clk_phase_sel_i(default_tx_phase),
 
@@ -116,7 +117,7 @@ mac_rx #(
 	.CONF_ETHTYPE(CONF_ETHTYPE)
 )m_mac_rx(
 	.clk(clk),
-	.rst_n(rst_n_d2_q),
+	.rst_n(rst_n_d2_q[0]),
 
 	.phy_mac_i(mac_addr),
 	.vid_i(vid),
@@ -135,7 +136,7 @@ mac_rx #(
 //application
 death_of_the_universe_counter #(.PHY_W(PHY_W)) m_death_counter(
 	.clk(clk),
-	.rst_n(rst_n_d2_q),
+	.rst_n(rst_n_d2_q[1]),
 
 	.mac_tx_v_o      (mac_tx_v),
 	.mac_tx_last_o   (mac_tx_last),
@@ -151,7 +152,7 @@ mac_conf #(
 	.DEFAULT_MAC(DEFAULT_MAC)
 )m_mac_conf(
 	.clk(clk),
-	.rst_n(rst_n_d2_q),
+	.rst_n(rst_n_d2_q[0]),
 
 	.data_v_i    (data_rx_v),
 	.data_conf_i (data_rx_conf),
@@ -169,7 +170,7 @@ mac_tx #(
 	.APP_ETHTYPE(APP_ETHTYPE)
 ) m_mac_tx(
 	.clk(clk),
-	.rst_n(rst_n_d2_q),
+	.rst_n(rst_n_d2_q[0]),
 	
 	.phy_mac_i(mac_addr),// conf
 	
