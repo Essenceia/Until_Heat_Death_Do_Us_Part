@@ -40,15 +40,16 @@
   "RUN_POST_GRT_RESIZER_TIMING" : "True", 
   
   "SYNTH_AUTONAME": "True",
-  "SYNTH_MUL_BOOTH": "True",
- 
-  "DESIGN_REPAIR_MAX_SLEW_PCT": 30, 
+
+  "DESIGN_REPAIR_MAX_SLEW_PCT": 30,
   "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 20, 
   "RUN_POST_GRT_DESIGN_REPAIR": "True", 
   "RUN_POST_GPL_DESIGN_REPAIR": "True",
   "RUN_POST_CTS_RESIZE_TIMING": "True",
   "RUN_POST_GRT_RESIZE_TIMING": "True",
 
+  "CTS_CLK_MAX_WIRE_LENGTH":200,
+  
   "//": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   "//": "!!! DO NOT CHANGE ANYTHING BELOW THIS POINT !!!",
   "//": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
