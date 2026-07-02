@@ -129,10 +129,7 @@ mac_rx #(
 	.data_conf_o(data_rx_conf),
 	.data_start_o(data_rx_start),
 	.data_err_o(data_rx_err),
-	.data_o(data_rx),
-/* verilator lint_off PINCONNECTEMPTY */
-	.data_src_mac_o()
-/* verilator lint_on PINCONNECTEMPTY */
+	.data_o(data_rx)
 );
 
 //application

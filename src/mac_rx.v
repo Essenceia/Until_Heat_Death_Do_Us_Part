@@ -35,8 +35,7 @@ module mac_rx #(
 	output wire        data_conf_o,
 	output wire        data_start_o,
 	output wire        data_err_o,
-	output wire [1:0]  data_o,
-	output wire [MAC_W-1:0] data_src_mac_o 
+	output wire [1:0]  data_o
 ); 
 localparam ADDR_CNT_VAL = (MAC_W/PHY_W) - 1;
 localparam ADDR_CNT_W   = $clog2(ADDR_CNT_VAL); 
@@ -92,7 +91,6 @@ wire frame_start;
 localparam CNT_W = ADDR_CNT_W; // $max(ADDR_CNT_W, FRAME_TYPE_CNT);
 reg  [CNT_W-1:0] cnt_q; // shared counter 
 
-reg [MAC_W-1:0] src_mac_q;
 wire            dst_addr_match; 
 
 wire            is_type;
@@ -184,11 +182,6 @@ always @(posedge clk)
 	else if (is_type)
 		fwd_q <= fwd_q & ethtype_match;
 
-// src mac capture 
-always @(posedge clk) 
-	if ((fsm_q == SRC_MAC) & (cnt_q[ADDR_CNT_W-1:0] == ADDR_CNT))
-		src_mac_q <= swap_buff[MAC_W-1:0];
- 
 // sticky error 
 always @(posedge clk) 
 	if (fsm_q == IDLE) 
@@ -209,24 +202,23 @@ assign fcs_err = eof & |(fcs);// end of packet, check fcs
 
 // data buffer, excluding the FCS without keeping track of
 // the data width for portability
-reg [DELAY_DEPTH-1:0] delay_data_v_q; 
-reg [DELAY_DEPTH-1:0] delay_data_start_q; 
+reg delay_data_v_q; 
+reg delay_data_start_q; 
 
 always @(posedge clk)
 	if (~rst_n | eof)
-		delay_data_v_q <= {DELAY_DEPTH{1'b0}};
+		delay_data_v_q <= 1'b0;
 	else
-		delay_data_v_q <= {delay_data_v_q[DELAY_DEPTH-2:0], fsm_q == BODY & fwd_q};
+		delay_data_v_q <= fsm_q == BODY & fwd_q;
 
 always @(posedge clk) 
-	delay_data_start_q <= {delay_data_start_q[DELAY_DEPTH-2:0], is_type & ethtype_match & fwd_q};	
+	delay_data_start_q <= is_type & ethtype_match & fwd_q;	
 
-assign data_v_o       = delay_data_v_q[DELAY_DEPTH-1];
+assign data_v_o       = delay_data_v_q;
 assign data_conf_o    = pkt_conf_q; 
-assign data_start_o   = delay_data_start_q[DELAY_DEPTH-1]; 
+assign data_start_o   = delay_data_start_q; 
 assign data_err_o     = err_q;
-assign data_o         = buff_q[BUF_W-FCS_W-1-:PHY_W];
-assign data_src_mac_o = src_mac_q;
+assign data_o         = buff_q[BUF_W-1-:PHY_W];
 
 `ifdef FORMEL 
 
