@@ -40,51 +40,13 @@ reg       clk_phase_sel_q;
 always @(posedge ref_clk) 
 	if (~rst_n)clk_phase_sel_q <= clk_phase_sel_i;
 
-`ifdef SCL_gf180mcu_fd_sc_mcu7t5v0
-gf180mcu_fd_sc_mcu7t5v0__clkinv_1 m_ref_clk_inv(
-	.I(ref_clk),
-	.ZN(ref_clk_inv)
-);
-gf180mcu_fd_sc_mcu7t5v0__clkbuf_1 m_ref_clk_buf(
-	.I(ref_clk),
-	.Z(ref_clk_buf)
-); 
- 
-gf180mcu_fd_sc_mcu7t5v0__mux2_1 m_ref_clk_mux(
-	.I0(ref_clk_inv),
-	.I1(ref_clk_buf),
-	.S(clk_phase_sel_q),
-	.Z(inner_clk)
-);
-
-`else
 assign ref_clk_inv = ~ref_clk;
 assign ref_clk_buf = ref_clk;
 assign inner_clk = clk_phase_sel_q ? ref_clk_inv: ref_clk_buf; 
-`endif
-
-
-`ifdef SCL_gf180mcu_fd_sc_mcu7t5v0
-wire       tx_v_buff;
-wire [1:0] tx_buff;
-
-assign tx_v_buff = tx_v_i;
-assign tx_buff = tx_i;
-`else
-(* DONT_TOUCH = "yes" *)
-wire       tx_v_buff;
-(* DONT_TOUCH = "yes" *)
-wire [1:0] tx_buff;
-
-// shooting design opt a bit until it stops being too good at creating
-// hold violations
-assign tx_v_buff = ~(~tx_v_i);
-assign tx_buff   = ~(~tx_i); 
-`endif
 
 always @(posedge inner_clk) begin
-	tx_v_q <= tx_v_buff; 
-	tx_q   <= tx_buff; 
+	tx_v_q <= tx_v_i; 
+	tx_q   <= tx_i; 
 end
 
 assign tx_v_o = tx_v_q; 
