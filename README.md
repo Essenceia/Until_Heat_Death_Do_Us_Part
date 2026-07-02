@@ -17,13 +17,13 @@ Assuming the big freeze arrives in $10^{100}$ years and we are operating at 50Mh
 - $`50*10^{6}*60*60*24*365.25`$ ticks per year
 - $`50*10^{6}*60*60*24*365.25*10^{100}`$ ticks until the big freeze
 
-So we need a $`\log_2(50*10^{6}*60*60*24*365.25*10^{100}) = 382.679718 \approx 383`$ sized counter.
+So we need a $`\log_2(50*10^{6}*60*60*24*365.25*10^{100}) = 382.679718 \approx 383`$ sized counter ... at the very least.
 
 # 100Mbps Ethernet 
 
 This project is re-using the [Teapot Ethernet accelerator wrapper](https://github.com/Essenceia/Teapot) for communicating
 over 100Mbps Ethernet using a CAT-3/5 cable in full-duplex mode. Here is to hopeing someone still remeber how to 
-talk Ethernet until then.  
+talk Ethernet by then.  
 
 ## Ethernet packets
 
