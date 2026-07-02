@@ -137,11 +137,11 @@ always @(posedge clk) begin
 end
 
 always @(posedge clk) 
-	if (~mac_tx_acc_i | ~rst_n) {buf_cnt_overflow_q, buf_cnt_q} <= {1'b1, {BUF_CNT_W{1'b0}}};// counter overflows, no need to rst
+	if (~mac_tx_acc_i) {buf_cnt_overflow_q, buf_cnt_q} <= {1'b1, {BUF_CNT_W{1'b0}}};// counter overflows, no need to rst
 	else {buf_cnt_overflow_q, buf_cnt_q} <= buf_cnt_q + {{BUF_CNT_W-1{1'b0}}, 1'b1};
 
 always @(posedge clk) 
-	if (tx_fsm_q == TX_MAGIC | ~rst_n) seg_cnt_q <= {SEG_CNT_W{1'b0}};
+	if (tx_fsm_q == TX_MAGIC) seg_cnt_q <= {SEG_CNT_W{1'b0}};
 	else seg_cnt_q <= seg_cnt_q + {{SEG_CNT_W-1{1'b0}}, buf_cnt_overflow_q};
 
 // I am not proud of this but this is still cheaper than have a shift register
