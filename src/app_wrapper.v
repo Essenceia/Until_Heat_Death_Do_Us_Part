@@ -83,23 +83,37 @@ inter 0:
 
 this is accomplished by the byteswap module
 */
-localparam ETH_FRAME_MIN_W = DD_CNT_W;
-localparam FRAME_CNT_VAL   = (ETH_FRAME_MIN_W/PHY_W)-1;
-localparam FRAME_CNT_W     = $clog2(FRAME_CNT_VAL);
-localparam BUF_W           = INNER_CNT_W;
+localparam BUF_W           = 16; 
+localparam BUF_CNT_VAL     = (BUF_W/PHY_W)-1;
+localparam BUF_CNT_W       = $clog2(BUF_CNT_VAL);
 /* verilator lint_off WIDTHTRUNC */
-localparam [FRAME_CNT_W-1:0]   FRAME_CNT   = FRAME_CNT_VAL;
+localparam [BUF_CNT_W-1:0] BUF_CNT = BUF_CNT_VAL;
+/* verilator lint_in WIDTHTRUNC */
+
+// number of buffers of inner counter parts to stream out 
+localparam INNER_BUF_CNT_W  = $clog2(INNER_CNT_N);
+/* verilator lint_off WIDTHTRUNC */
+localparam [INNER_BUF_CNT_W-1:0]  INNER_BUF_CNT = INNER_CNT_N;
 /* verilator lint_on WIDTHTRUNC */
 
+localparam [BUF_W-1:0] MAGIC_NUMBER = 16'hFECA;//CAFE in little endian
+
 // tx fsm 
-localparam TX_IDLE    = 2'b00;
-localparam TX_PENDING = 2'b01;// wait for tx to finish sending header
-localparam TX_STREAM  = 2'b11;
+localparam TX_IDLE     = 2'd0;
+localparam TX_PENDING  = 2'd1;// wait for tx to finish sending header
+localparam TX_MAGIC    = 2'd2;
+localparam TX_STREAM   = 2'd3;
 
 reg  [1:0] tx_fsm_q;
-reg  [FRAME_CNT_W-1:0] tx_cnt_q;
+
+reg  [BUF_CNT_W-1:0]       buf_cnt_q;
+reg  [INNER_BUF_CNT_W-1:0] inner_buf_cnt_q;
+
+wire [BUF_W-1:0] buf_inner_next;
+reg  [BUF_W-1:0] buf_next;
 wire [BUF_W-1:0] swap_buf_next;
 reg  [BUF_W-1:0] buf_q;
+reg              buf_cnt_overflow_q;
  
 always @(posedge clk) begin
 	if (~rst_n) 
@@ -108,23 +122,60 @@ always @(posedge clk) begin
 		case(tx_fsm_q)
 			TX_IDLE   : tx_fsm_q <= send_tx_req ? TX_PENDING: TX_IDLE;
 			TX_PENDING: tx_fsm_q <= mac_tx_acc_i? TX_STREAM: TX_REQ;
-		    TX_STREAM : tx_fsm_q <= (tx_cnt_q == FRAME_CNT) ? TX_IDLE: TX_STREAM;	
+			TX_MAGIC  : tx_fsm_q <= buf_cnt_overflow_q ? TX_STREAM: TX_MAGIC;
+		    TX_STREAM : tx_fsm_q <= (inner_buf_cnt_q == INNER_BUF_CNT) ? TX_IDLE: TX_STREAM;	
 		endcase
 	end
 end
 
 always @(posedge clk) 
-	if (tx_fsm_q == TX_REQ) tx_cnt_q <= {FRAME_CNT_W{1'b0}};
-	else if (mac_tx_acc_i) tx_cnt_q <= tx_cnt_q + {{FRAME_CNT_W-1{1'b0}}, 1'b1};
-
-byteswap #(.W(BUF_W/8)) m_swap_mul_res(.i(mul_res), .o(swap_buf_next));
+	if (tx_fsm_q == TX_PENDING) {buf_cnt_overflow_q, buf_cnt_q} <= {BUF_CNT_W+1{1'b0}};// counter overflows, no need to rst
+	else {buf_cnt_overflow_q, buf_cnt_q} <= buf_cnt_q + {{BUF_CNT_W-1{1'b0}}, 1'b1};
 
 always @(posedge clk) 
-	if (tx_fsm_q == TX_CAPTURE) buf_q <= swap_buf_next;
-	else if (tx_fsm_q == TX_STREAM) buf_q <= {{PHY_W{1'b0}}, buf_q[BUF_W-1:PHY_W]}; // padd with 0s
+	if (tx_fsm_q == TX_MAGIC) inner_buf_cnt_q <= {INNER_BUF_CNT_W{1'b0}};
+	else inner_buf_cnt_q <= inner_buf_cnt_q + {{INNER_BUF_CNT_W-1{1'b0}}, buf_cnt_overflow_q};
 
-assign mac_tx_v_o = (tx_fsm_q == TX_REQ) | (tx_fsm_q == TX_STREAM);
-assign mac_tx_last_o = (tx_fsm_q == TX_STREAM) & (tx_cnt_q == FRAME_CNT);
+// I am not proud of this but this is still cheaper than have a shift register
+// being explicit about default case, not making any assumptions on synth, to dangerous
+always @(*) begin
+    case(inner_buf_cnt_q)
+        5'd0:    buf_inner_next = inner_cnt_q[0];
+        5'd1:    buf_inner_next = inner_cnt_q[1];
+        5'd2:    buf_inner_next = inner_cnt_q[2];
+        5'd3:    buf_inner_next = inner_cnt_q[3];
+        5'd4:    buf_inner_next = inner_cnt_q[4];
+        5'd5:    buf_inner_next = inner_cnt_q[5];
+        5'd6:    buf_inner_next = inner_cnt_q[6];
+        5'd7:    buf_inner_next = inner_cnt_q[7];
+        5'd8:    buf_inner_next = inner_cnt_q[8];
+        5'd9:    buf_inner_next = inner_cnt_q[9];
+        5'd10:   buf_inner_next = inner_cnt_q[10];
+        5'd11:   buf_inner_next = inner_cnt_q[11];
+        5'd12:   buf_inner_next = inner_cnt_q[12];
+        5'd13:   buf_inner_next = inner_cnt_q[13];
+        5'd14:   buf_inner_next = inner_cnt_q[14];
+        5'd15:   buf_inner_next = inner_cnt_q[15];
+        5'd16:   buf_inner_next = inner_cnt_q[16];
+        5'd17:   buf_inner_next = inner_cnt_q[17];
+        5'd18:   buf_inner_next = inner_cnt_q[18];
+        5'd19:   buf_inner_next = inner_cnt_q[19];
+        5'd20:   buf_inner_next = inner_cnt_q[20];
+        5'd21:   buf_inner_next = inner_cnt_q[21];
+        5'd22:   buf_inner_next = inner_cnt_q[22];
+        5'd23:   buf_inner_next = inner_cnt_q[23];
+        default: buf_inner_next = {INNER_CNT_W{1'bX}};
+    endcase
+end
+assign buf_next = tx_fsm_q == TX_MAGIC ? MAGIC_NUMBER : buf_inner_next; 
+byteswap #(.W(BUF_W/8)) m_swap_mul_res(.i(buf_next), .o(swap_buf_next));
+
+always @(posedge clk) 
+	if (tx_fsm_q == TX_PENDING | buf_cnt_overflow_q) buf_q <= swap_buf_next;
+	else buf_q <= {{PHY_W{1'b0}}, buf_q[BUF_W-1:PHY_W]}; // padd with 0s
+
+assign mac_tx_v_o = (tx_fsm_q != TX_IDLE);
+assign mac_tx_last_o = (tx_fsm_q == TX_STREAM) & (inner_buf_cnt_q == FRAME_CNT);
 assign mac_tx_o = buf_q[PHY_W-1:0];
 assign mac_tx_dst_mac_o = BROADCAST_ADDR;
 
