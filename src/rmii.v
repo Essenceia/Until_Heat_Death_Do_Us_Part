@@ -40,7 +40,6 @@ end
 
 tx_tt_buffer m_tx_delay(
 	.ref_clk(clk),
-	.rst_n(rst_n), 
 
 	.clk_phase_sel_i(clk_phase_sel_i),
 
