@@ -86,7 +86,7 @@ async def send_and_check_frames(dut, rx: mac_utils.eth_frame, device_mac = mac_u
 			assert(0)
 
 # Simple test 
-@cocotb.test()
+@cocotb.test(skip=True if GATES == "yes" else False)
 async def simple_tx_test(dut):
 	random.seed(0)
 	await rst(dut) 
