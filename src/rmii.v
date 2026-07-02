@@ -58,11 +58,11 @@ reg       mac_rx_err_q;
 reg [1:0] mac_rx_q;
 
 `ifdef SCL_gf180mcu_fd_sc_mcu7t5v0
-gf180mcu_fd_sc_mcu7t5v0__dlyb_2 m_dly_rx_v(
+gf180mcu_fd_sc_mcu7t5v0__dlyb_4 m_dly_rx_v(
 	.I(phy_rx_v_i),
 	.Z(mac_rx_v_next)
 );
-gf180mcu_fd_sc_mcu7t5v0__dlyb_2 m_dly_rx_err(
+gf180mcu_fd_sc_mcu7t5v0__dlyb_4 m_dly_rx_err(
 	.I(phy_rx_err_i),
 	.Z(mac_rx_err_next)
 );
