@@ -1,106 +1,41 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Thu Jun  4 15:06:21 2026
+[*] Thu Jul  2 04:13:17 2026
 [*]
-[dumpfile] "/home/pitchu/asic/teapot/test/tb.vcd"
-[dumpfile_mtime] "Thu Jun  4 15:04:20 2026"
-[dumpfile_size] 178440
-[savefile] "/home/pitchu/asic/teapot/test/tb.gtkw"
-[timestart] 162750300
+[dumpfile] "/home/pitchu/asic/heat_death/test/tb.vcd"
+[dumpfile_mtime] "Thu Jul  2 04:12:40 2026"
+[dumpfile_size] 152663
+[savefile] "/home/pitchu/asic/heat_death/test/tb.gtkw"
+[timestart] 1313015900
 [size] 1910 470
 [pos] -1 -1
-*-16.384033 163086800 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-16.384033 1313210000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [treeopen] tb.m_dut.
 [sst_width] 290
-[signals_width] 335
+[signals_width] 190
 [sst_expanded] 1
-[sst_vpaned_height] 175
-@28
-tb.m_dut.m_mac_conf.data_start_i
-tb.m_dut.m_mac_conf.data_v_i
-tb.m_dut.m_mac_conf.data_i[1:0]
-tb.m_dut.m_mac_conf.data_conf_i
-tb.m_dut.m_mac_conf.fsm_q
-@c00022
-tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-@28
-(0)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(1)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(2)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(3)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(4)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(5)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(6)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(7)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(8)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(9)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(10)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(11)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(12)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(13)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(14)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(15)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(16)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(17)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(18)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(19)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(20)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(21)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(22)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(23)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(24)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(25)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(26)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(27)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(28)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(29)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(30)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(31)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(32)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(33)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(34)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(35)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(36)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(37)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(38)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(39)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(40)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(41)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(42)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(43)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(44)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(45)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(46)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-(47)tb.m_dut.m_mac_conf.mac_addr_o[47:0]
-@1401200
--group_end
-@22
-tb.m_dut.m_mac_conf.vid_o[11:0]
-@28
-tb.m_dut.m_mac_conf.clk_phase_sel_o
-@24
-tb.m_dut.m_mac_conf.PKT_DATA_CNT
-tb.m_dut.m_mac_conf.cnt_q[4:0]
-@23
-tb.m_dut.m_mac_conf.buff_q[61:0]
-@22
-tb.m_dut.m_mac_conf.buff_next[7:0]
+[sst_vpaned_height] 187
 @200
--mac rx
-@22
-tb.m_dut.m_mac_rx.fsm_q[3:0]
-tb.m_dut.m_mac_rx.buff[47:0]
-@c00022
-#{tb.m_dut.m_mac_rx.buff[35:32]} (12)tb.m_dut.m_mac_rx.buff[47:0] (13)tb.m_dut.m_mac_rx.buff[47:0] (14)tb.m_dut.m_mac_rx.buff[47:0] (15)tb.m_dut.m_mac_rx.buff[47:0]
+-inner
 @28
-(12)tb.m_dut.m_mac_rx.buff[47:0]
-(13)tb.m_dut.m_mac_rx.buff[47:0]
-(14)tb.m_dut.m_mac_rx.buff[47:0]
-(15)tb.m_dut.m_mac_rx.buff[47:0]
-@1401200
--group_end
-@420
-tb.m_dut.m_mac_rx.FCS_W
+tb.m_dut.m_app_wrapper.send_tx_req
+tb.m_dut.m_app_wrapper.tx_fsm_q[1:0]
+tb.m_dut.m_app_wrapper.mac_tx_acc_i
+@24
+tb.m_dut.m_app_wrapper.buf_cnt_q[2:0]
+@22
+tb.m_dut.m_app_wrapper.buf_next[15:0]
+@28
+tb.m_dut.m_app_wrapper.buf_cnt_overflow_q
+@22
+tb.m_dut.m_app_wrapper.buf_q[15:0]
+tb.m_dut.m_app_wrapper.inner_buf_cnt_q[4:0]
+@201
+-debug
+@22
+tb.m_dut.m_app_wrapper.debug_inner0[15:0]
+tb.m_dut.m_app_wrapper.debug_inner1[15:0]
+tb.m_dut.m_app_wrapper.debug_inner2[15:0]
 [pattern_trace] 1
 [pattern_trace] 0

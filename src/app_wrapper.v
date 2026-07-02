@@ -98,10 +98,10 @@ localparam [BUF_CNT_W-1:0] BUF_CNT = BUF_CNT_VAL;
 // number of buffers of inner counter parts to stream out 
 localparam INNER_BUF_CNT_W  = $clog2(INNER_CNT_N);
 /* verilator lint_off WIDTHTRUNC */
-localparam [INNER_BUF_CNT_W-1:0]  INNER_BUF_CNT = INNER_CNT_N;
+localparam [INNER_BUF_CNT_W-1:0]  INNER_BUF_CNT = INNER_CNT_N - 1;
 /* verilator lint_on WIDTHTRUNC */
 
-localparam [BUF_W-1:0] MAGIC_NUMBER = 16'hFECA;//CAFE in little endian
+localparam [BUF_W-1:0] MAGIC_NUMBER = 16'hCAFE;
 
 // tx fsm 
 localparam TX_IDLE     = 2'd0;
@@ -125,16 +125,16 @@ always @(posedge clk) begin
 		tx_fsm_q <= TX_IDLE; 
 	else begin
 		case(tx_fsm_q)
-			TX_IDLE   : tx_fsm_q <= send_tx_req ? TX_PENDING: TX_IDLE;
-			TX_PENDING: tx_fsm_q <= mac_tx_acc_i? TX_STREAM: TX_MAGIC;
-			TX_MAGIC  : tx_fsm_q <= buf_cnt_overflow_q ? TX_STREAM: TX_MAGIC;
-		    TX_STREAM : tx_fsm_q <= (inner_buf_cnt_q == INNER_BUF_CNT) ? TX_IDLE: TX_STREAM;	
+			TX_IDLE   : tx_fsm_q <= send_tx_req & stream_start ? TX_PENDING: TX_IDLE;
+			TX_PENDING: tx_fsm_q <= mac_tx_acc_i? TX_MAGIC: TX_PENDING;
+			TX_MAGIC  : tx_fsm_q <= (buf_cnt_q == BUF_CNT) ? TX_STREAM: TX_MAGIC;
+		    TX_STREAM : tx_fsm_q <= (inner_buf_cnt_q == INNER_BUF_CNT) & buf_cnt_overflow_q ? TX_IDLE: TX_STREAM;	
 		endcase
 	end
 end
 
 always @(posedge clk) 
-	if (tx_fsm_q == TX_PENDING) {buf_cnt_overflow_q, buf_cnt_q} <= {BUF_CNT_W+1{1'b0}};// counter overflows, no need to rst
+	if (~mac_tx_acc_i) {buf_cnt_overflow_q, buf_cnt_q} <= {1'b1, {BUF_CNT_W{1'b0}}};// counter overflows, no need to rst
 	else {buf_cnt_overflow_q, buf_cnt_q} <= buf_cnt_q + {{BUF_CNT_W-1{1'b0}}, 1'b1};
 
 always @(posedge clk) 
@@ -176,13 +176,19 @@ assign buf_next = tx_fsm_q == TX_PENDING ? MAGIC_NUMBER : buf_inner_next;
 byteswap #(.W(BUF_W/8)) m_swap_mul_res(.i(buf_next), .o(swap_buf_next));
 
 always @(posedge clk) 
-	if (tx_fsm_q == TX_PENDING | buf_cnt_overflow_q) buf_q <= swap_buf_next;
+	if (buf_cnt_overflow_q) buf_q <= swap_buf_next;
 	else buf_q <= {{PHY_W{1'b0}}, buf_q[BUF_W-1:PHY_W]}; // padd with 0s
 
 assign mac_tx_v_o = (tx_fsm_q != TX_IDLE);
-assign mac_tx_last_o = (tx_fsm_q == TX_STREAM) & (inner_buf_cnt_q == INNER_BUF_CNT);
+assign mac_tx_last_o = (tx_fsm_q == TX_STREAM) & (inner_buf_cnt_q == INNER_BUF_CNT) & buf_cnt_overflow_q;
 assign mac_tx_o = buf_q[PHY_W-1:0];
 assign mac_tx_dst_mac_o = BROADCAST_ADDR;
 
+`ifdef COCOTB 
+wire [INNER_CNT_W-1:0] debug_inner0, debug_inner1, debug_inner2; 
+assign debug_inner0 = inner_cnt_q[0];
+assign debug_inner1 = inner_cnt_q[1];
+assign debug_inner2 = inner_cnt_q[2];
+`endif
 endmodule
 

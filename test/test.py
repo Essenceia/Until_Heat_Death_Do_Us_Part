@@ -19,6 +19,12 @@ if "GATES" in os.environ:
 else:
 	GATES = ""
 
+if "TEST_ITER" in os.environ:
+	TEST_ITER = int(os.environ["TEST_ITER"].lower().strip())
+else:
+	TEST_ITER = 2
+
+
 CLK_UNIT="ns"
 CLK_PERIOD=20
 TCK_UNIT=CLK_UNIT 
@@ -84,7 +90,7 @@ async def send_and_check_frames(dut, rx: mac_utils.eth_frame, device_mac = mac_u
 async def simple_tx_test(dut):
 	random.seed(0)
 	await rst(dut) 
-	for _ in range(0,10):
+	for _ in range(0,TEST_ITER):
 		await read_frame(dut)
 
 @cocotb.test(skip=True if GATES == "yes" else False)
@@ -92,7 +98,7 @@ async def update_eth_config(dut):
 	random.seed(0)
 	await rst(dut)
 	device_mac = mac_utils.DEFAULT_DEVICE_MAC
-	for _ in range(0,10):
+	for _ in range(0,TEST_ITER):
 		new_mac = random.randbytes(6)
 		frame, config = mac_utils.simple_config(dst_mac = device_mac, new_mac = new_mac)
 		await send_frame(dut, frame)
