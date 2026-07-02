@@ -7,6 +7,8 @@ with the current counters value, not that anyone is going to be listening for lo
 Assuming the universe dies in approximatively $10^{100}$ years. If you are patient enogth to wait until then there is 
 a hidden easter egg when we eventually overflow.  
 
+![floorplan](/docs/floorplan_lazy.png) 
+
 # Doomsday counter 
 
 No need to be scared, the sun will have engulfed our feable planet long before the counter overflows. 
