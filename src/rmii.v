@@ -51,9 +51,25 @@ tx_tt_buffer m_tx_delay(
 ); 
 
 // RX - pass though, flop for timing
+wire      mac_rx_v_next;
 reg       mac_rx_v_q;
+wire      mac_rx_err_next;
 reg       mac_rx_err_q;
 reg [1:0] mac_rx_q;
+
+`ifdef SCL_gf180mcu_fd_sc_mcu7t5v0
+gf180mcu_fd_sc_mcu7t5v0__dlyb_2 m_dly_rx_v(
+	.I(phy_rx_v_i),
+	.Z(mac_rx_v_next)
+);
+gf180mcu_fd_sc_mcu7t5v0__dlyb_2 m_dly_rx_err(
+	.I(phy_rx_err_i),
+	.Z(mac_rx_err_next)
+);
+`else
+	assign mac_rx_v_next   = phy_rx_v_i;
+	assign mac_rx_err_next = phy_rx_err_i;
+`endif
 
 always @(posedge clk) begin
 	if (~rst_n) begin
@@ -61,8 +77,8 @@ always @(posedge clk) begin
 		mac_rx_err_q <= 1'b0;
 		mac_rx_q     <= 2'b00;
 	end else begin
-		mac_rx_v_q   <= phy_rx_v_i;
-		mac_rx_err_q <= phy_rx_err_i;
+		mac_rx_v_q   <= mac_rx_v_next;
+		mac_rx_err_q <= mac_rx_err_next;
 		mac_rx_q     <= phy_rx_i;
 	end
 end
