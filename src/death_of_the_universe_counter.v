@@ -12,7 +12,7 @@ Counting until the heat death of the universe, broadcasting
 counter value over an ethernet frame every 1 second (more of less 1.3 ms).
 */
 module death_of_the_universe_counter #(
-	parameter PHY_W    = 2,
+	parameter  PHY_W   = 2,
 	localparam MAC_W   = 48, 
 	localparam [MAC_W-1:0] BROADCAST_ADDR = 48'hFFFFFFFFFFFF
 )(
@@ -26,9 +26,16 @@ module death_of_the_universe_counter #(
 	output wire [MAC_W-1:0] mac_tx_dst_mac_o// guarantied to not change until packet header has finished sending
 );
 localparam DD_CNT_BYTES_W = 48; // death of the universe counter width
-localparam DD_CNT_W = DD_CNT_BYTES_W * 8; 
-localparam INNER_CNT_W = 16;
-localparam INNER_CNT_N = DD_CNT_W / INNER_CNT_W; // number of cascading intermediary counters
+localparam DD_CNT_W       = DD_CNT_BYTES_W * 8; 
+localparam INNER_CNT_W    = 16;
+localparam INNER_CNT_N    = DD_CNT_W / INNER_CNT_W; // number of cascading intermediary counters
+
+localparam TX_IDLE     = 2'd0;
+localparam TX_PENDING  = 2'd1;// wait for tx to finish sending header
+localparam TX_MAGIC    = 2'd2;
+localparam TX_STREAM   = 2'd3;
+
+reg  [1:0] tx_fsm_q;
 
 // 1s update pending trigger
 wire send_tx_req; 
@@ -37,7 +44,7 @@ wire stream_start;
 broadcast_timer m_1s_timer(
 	.clk(clk), 
 	.rst_n(rst_n),
-	.update_finished_i(stream_start),
+	.update_finished_i((tx_fsm_q == TX_PENDING)),
 	.update_req_o(send_tx_req)
 );
 
@@ -67,7 +74,11 @@ endgenerate
 
 // start stream when lower counter overflows, guaranties increment will have time to ripple though the 
 // counter segments we are streaming out 
+`ifdef COCOTB
+assign stream_start = 1'b1; // start stream early to increase tb speed
+`else
 assign stream_start = inner_cnt_overflow_q[0];
+`endif
 
 assign its_dead_jim = inner_cnt_overflow_q[INNER_CNT_N-1];
 
@@ -103,13 +114,6 @@ localparam [INNER_BUF_CNT_W-1:0]  INNER_BUF_CNT = INNER_CNT_N - 1;
 localparam [BUF_W-1:0] MAGIC_NUMBER = 16'hCAFE;
 
 // tx fsm 
-localparam TX_IDLE     = 2'd0;
-localparam TX_PENDING  = 2'd1;// wait for tx to finish sending header
-localparam TX_MAGIC    = 2'd2;
-localparam TX_STREAM   = 2'd3;
-
-reg  [1:0] tx_fsm_q;
-
 reg  [BUF_CNT_W-1:0]       buf_cnt_q;
 reg  [INNER_BUF_CNT_W-1:0] inner_buf_cnt_q;
 
