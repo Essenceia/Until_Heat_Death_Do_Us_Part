@@ -53,16 +53,7 @@ int main(int argc, char * argv[]){
 	}
 	printf("asic mac address ");
 	print_mac(asic_mac_addr);
-
-	/* resolve dst address */
-	struct sockaddr_ll sock_addr; 
-	memset(&sock_addr, 0, sizeof(sock_addr));
-	sock_addr.sll_family = AF_PACKET; 
-	sock_addr.sll_protocol = htons(APP_ETHTYPE);
-	sock_addr.sll_ifindex = eth_intf_idx;
-	sock_addr.sll_pkttype = PACKET_OTHERHOST;
-	sock_addr.sll_halen = MAC_W; 
-	memcpy(sock_addr.sll_addr, asic_mac_addr, MAC_W);
+	printf("\n");
 
 	/* receeive app packet */
 	size_t rx_len; 	

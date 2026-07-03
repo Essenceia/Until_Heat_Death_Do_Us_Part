@@ -40,6 +40,27 @@ Eg:
 sudo ./packet_receiver wlp3s0
 ```
 
+Expected output: 
+```
+ethernet interface: wlp3s0
+wlp3s0 mac address 60:e9:aa:92:dc:7d
+asic mac address 00:90:cf:00:be:ef
+
+dst mac ff:ff:ff:ff:ff:ff
+src mac 00:90:cf:00:be:ef
+ethtype 88b5
+counter: 3288083398753
+counter debug: 0x00000000910b0061
+raw pkt: ffffffffffff0090cf00beef88b5feca61000b91fd02000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+dst mac ff:ff:ff:ff:ff:ff
+src mac 00:90:cf:00:be:ef
+ethtype 88b5
+counter: 3288133402721
+counter debug: 0x0000000094060061
+raw pkt: ffffffffffff0090cf00beef88b5feca61000694fd02000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+```
+
 Now it is parsing the counter value as a `uint64_t` so technically this will only work correctly 
 for the next 11680 years. Now I know this is concerning and you must be shocked at such sloppy engineering 
 practice of knowingly releasing buggy software, I hear you. But let us first let humanity survive the [Epochalypse](https://en.wikipedia.org/wiki/Year_2038_problem)
