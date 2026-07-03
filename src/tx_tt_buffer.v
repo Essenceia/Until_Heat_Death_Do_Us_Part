@@ -33,11 +33,20 @@ wire      ref_clk_buf;
 wire      inner_clk; 
 reg       tx_v_q; 
 reg [1:0] tx_q;
+wire      clk_phase_sel_next;
 reg       clk_phase_sel_q;
 
+`ifdef SCL_gf180mcu_fd_sc_mcu7t5v0
+(* dont_touch *)gf180mcu_fd_sc_mcu7t5v0__buf_1 m_buf_clk_phase_sel(
+	.I(clk_phase_sel_i),
+	.Z(clk_phase_sel_next)
+);
+`else
+assign clk_phase_sel_next = clk_phase_sel_i;
+`endif
 
 always @(posedge ref_clk) 
-	clk_phase_sel_q <= clk_phase_sel_i;
+	clk_phase_sel_q <= clk_phase_sel_next;
 
 assign ref_clk_inv = ~ref_clk;
 assign ref_clk_buf = ref_clk;
