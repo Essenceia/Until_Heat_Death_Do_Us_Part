@@ -176,10 +176,10 @@ always @(*) begin
     endcase
 end
 assign buf_next = tx_fsm_q == TX_PENDING ? MAGIC_NUMBER : buf_inner_next; 
-byteswap #(.W(BUF_W/8)) m_swap_mul_res(.i(buf_next), .o(swap_buf_next));
+//byteswap #(.W(BUF_W/8)) m_swap_mul_res(.i(buf_next), .o(swap_buf_next));
 
 always @(posedge clk) 
-	if (buf_cnt_overflow_q) buf_q <= swap_buf_next;
+	if (buf_cnt_overflow_q) buf_q <= buf_next;
 	else buf_q <= {{PHY_W{1'bx}}, buf_q[BUF_W-1:PHY_W]}; // padd with 0s
 
 assign mac_tx_v_o = (tx_fsm_q != TX_IDLE);
