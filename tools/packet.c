@@ -28,17 +28,25 @@ void print_header(eth_header_t h){
 	printf("ethtype %04x\n", htons(h.ethtype));
 }
 
+#ifdef TESTING
+uint64_t debug_cnt = 0; 
+#endif
+
 void print_app_packet(app_packet_t *pkt){
 	uint64_t cnt; 
-	printf("\napp packet:\n");
 	print_header(pkt->header);
-	if (htons(pkt->magic_number) == MAGIC_NUMBER){
+	if (pkt->magic_number == MAGIC_NUMBER){
 		memcpy(&cnt, pkt->counter, sizeof(uint64_t));
-		printf("counter: %lu", cnt);
+		printf("counter: %lu\n", cnt);
+		#ifdef TESTING
+		printf("counter debug: 0x%016x\n",cnt);
+		assert(debug_cnt < cnt);
+		debug_cnt = cnt; 
+		#endif
 	}else{
 		printf("not our packet, missformed magic number %04x, expecting %04x", htons(pkt->magic_number), MAGIC_NUMBER);
 	}
-	printf("\nraw: ");
+	printf("raw pkt: ");
 	print_raw_packet((uint8_t*)pkt, APP_PACKET_LENGTH);
 	printf("\n\n");
 }
