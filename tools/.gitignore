@@ -2,3 +2,4 @@ test
 vgcore*
 *.o
 packet_sender
+packet_receiver

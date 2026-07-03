@@ -12,7 +12,6 @@
 
 #include "eth_intf.h"
 #include "packets.h" 
-#include "math_lib.hpp" 
 
 int main(int argc, char * argv[]){
 	int sock; 
@@ -65,49 +64,31 @@ int main(int argc, char * argv[]){
 	sock_addr.sll_halen = MAC_W; 
 	memcpy(sock_addr.sll_addr, asic_mac_addr, MAC_W);
 
-	/* create application packet */
-	uint16_t a = 0xBEEF;
-	uint16_t b = 0xCAFE;
-	app_packet_t *tx_pkt = create_app_packet(asic_mac_addr, device_mac_addr, a,b);
-
-	/* send app packet */
-    ssize_t sent;	
-	struct sockaddr_ll rx_addr;
-	socklen_t rx_addr_len = sizeof(rx_addr);
+	/* receeive app packet */
 	size_t rx_len; 	
-	uint8_t rx_buff[ETH_FRAME_MAX_W];
+	uint8_t rx_buff[APP_PACKET_LENGTH];
 	app_packet_t rx_app_pkt;
+	bool is_bcast;
 
-	for (int i = 0; i < 1; i++){
-		/* update a,b to some random value within range of bfloat16 asic range */
-		tx_pkt->a = bf16_remap_input((uint16_t)rand()); 
-		tx_pkt->b = bf16_remap_input((uint16_t)rand()); 
-		print_app_packet(tx_pkt, true);
+	while(1){
+		rx_len = recv(sock, rx_buff, APP_PACKET_LENGTH, 0);
+        if (rx_len < 0) {
+			printf("error no response received");
+            break;
+        }
 
-		if(sendto(sock, tx_pkt, APP_PACKET_LENGTH, 0,(struct sockaddr *)&sock_addr, sizeof(sock_addr)) < 0){
-			//close(sock);
-			free(tx_pkt);
-			return -1;
-		}
-		printf("%04d message has sucesfully been sent\n", i);
-		
-		usleep(100);
-
-		rx_len = recvfrom(sock, rx_buff, ETH_FRAME_MAX_W, 0,(struct sockaddr *)&rx_addr, &rx_addr_len);
-		if (rx_len == 0){
-			printf("Error no response received");
-			free(tx_pkt);
-			return -1;
-		}
-		if (rx_len != sizeof(app_packet_t)){
-			printf("Error: unexpected packet length received, got %d expected %d", rx_len, sizeof(app_packet_t));
-		}
+		if (rx_len != sizeof(app_packet_t))printf("Error: unexpected packet length received, got %d expected %d", rx_len, sizeof(app_packet_t));
+	
 		memcpy(&rx_app_pkt, rx_buff, sizeof(app_packet_t));
-		print_app_packet(&rx_app_pkt, false);	
+		is_bcast = (rx_app_pkt.header.dst_mac[0] == 0xFF
+					 && rx_app_pkt.header.dst_mac[1] == 0xFF
+					 && rx_app_pkt.header.dst_mac[2] == 0xFF
+					 && rx_app_pkt.header.dst_mac[3] == 0xFF
+					 && rx_app_pkt.header.dst_mac[4] == 0xFF
+					 && rx_app_pkt.header.dst_mac[5] == 0xFF);
 
-		print_mul_bf16(tx_pkt->a, tx_pkt->b);
+		if(is_bcast) print_app_packet(&rx_app_pkt);	
 	}
 	//close(sock);
-	free(tx_pkt); 
 	return 0;
 }

@@ -1,10 +1,9 @@
-BIN_NAME=packet_sender
-DEFAULT_ETH=enp2s0
+BIN_NAME=packet_receiver
+DEFAULT_ETH=wlp3s0
 
 SRC_C := $(wildcard *.c)
-SRC_CPP := $(wildcard *.cpp)
 
-OBJ:=$(SRC_C:.c=.c.o) $(SRC_CPP:.cpp=.cpp.o)
+OBJ:=$(SRC_C:.c=.c.o)
 
 $(info obj $(OBJ))
 
@@ -15,11 +14,8 @@ $(info obj $(OBJ))
 %.c.o: %.c
 	gcc $(C_FLAGS) -o $@ -c $<
 
-%.cpp.o: %.cpp
-	g++ -std=c++23 -o $@ -c $< 
-
 $(BIN_NAME): $(OBJ) 
-	gcc -o $@ -lstdc++ -lm $(OBJ)
+	gcc -o $@ $(OBJ)
 
 build: $(BIN_NAME) 
 

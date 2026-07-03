@@ -82,8 +82,6 @@ Values:
 - `0` no phase shift
 - `1` 180 degree phase shift
 
-
- 
 ## How to test
 
 Connect the ethernet 100Mbps capable connector to the asic, if the connector doesn't 
