@@ -108,7 +108,7 @@ localparam [BUF_CNT_W-1:0] BUF_CNT = BUF_CNT_VAL;
 // number of buffers of inner counter parts to stream out 
 localparam SEG_CNT_W  = $clog2(INNER_CNT_N);
 /* verilator lint_off WIDTHTRUNC */
-localparam [SEG_CNT_W-1:0]  SEG_CNT = INNER_CNT_N - 1;
+localparam [SEG_CNT_W-1:0]  SEG_CNT = INNER_CNT_N;
 /* verilator lint_on WIDTHTRUNC */
 
 localparam [BUF_W-1:0] MAGIC_NUMBER = 16'hCAFE;

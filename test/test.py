@@ -58,9 +58,11 @@ async def rst(dut, ena=1 ):
 async def send_frame(dut, rx: mac_utils.eth_frame):
 	await mac_utils.phy_stream_frame(dut, rx.raw())
 
-async def read_frame(dut): 
+async def read_app_frame(dut): 
 	tx_frame = await mac_utils.read_tx_frame(dut)
 	gotten = tx_frame.tobytes().hex()
+	exp_len = 8+2*6+2+2+48+4
+	assert len(tx_frame) == exp_len, f"unexpected app frame, got {exp_len}/{len(tx_frame)}"
 	cocotb.log.info(f"tx {gotten}")
 
 
@@ -91,7 +93,7 @@ async def simple_tx_test(dut):
 	random.seed(0)
 	await rst(dut) 
 	for _ in range(0,TEST_ITER):
-		await read_frame(dut)
+		await read_app_frame(dut)
 
 @cocotb.test(skip=True if GATES == "yes" else False)
 async def update_eth_config(dut):
