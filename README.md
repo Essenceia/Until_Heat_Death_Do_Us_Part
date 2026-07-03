@@ -9,6 +9,8 @@ a hidden easter egg when we eventually overflow.
 
 ![floorplan](/docs/floorplan_lazy.png) 
 
+Quickstart can be found [in the documentation](/docs/info.md).
+
 # Doomsday counter 
 
 No need to be scared, the sun will have engulfed our feable planet long before the counter overflows. 
@@ -44,10 +46,10 @@ and broadcasts the current counter value every second.
 
 **Response**
 ```
-[ dst mac (6 Bytes) FF:FF:FF:FF:FF:FF ][ src mac (6 Bytes) ][ ethtype = 0x88B5 (2 Bytes) ][ counter (48 Bytes) ][ FCS (4 Bytes) ] 
+[ dst mac (6 Bytes) FF:FF:FF:FF:FF:FF ][ src mac (6 Bytes) ][ ethtype = 0x88B5 (2 Bytes) ][ magic number (2 Bytes) 0xCAFE ][ counter (48 Bytes) ][ FCS (4 Bytes) ] 
 0
 ```
-Counter values are sent in little endian with a granule size of 1 byte (standard).
+Counter values and magic numbers are sent in little endian with a granule size of 1 byte (standard).
 
 ### Configuration packets
 
@@ -119,6 +121,30 @@ This MAC supports:
 The MAC will filter out all unicast packets not matching the configured
 destination MAC address. This implies that all broadcast and multicast 
 packets will be forwarded. 
+
+# Software support
+
+To help you sniff your local network traffic and parse the ethernet frame I am providing 
+the `packet_receiver` program under the tools folder in case we have all forgotten how to code by then. 
+In case compilers are still a thing you can build it with: 
+```
+cd tools
+make
+```
+
+To run specify the network interface you want to sniff as the first argument, also yes, you need sudo mode.
+
+Eg:
+```
+sudo ./packet_receiver wlp3s0
+```
+
+Now technically it is parsing the counter value as a `uint64_t` so technically this will only work correctly 
+for the next 11680 years. Now I know this is converning and you must be shoked at such sloppy engineering 
+practice of knowingly releasing buggy software, I hear you. But let us first let humanity survive the [Epochalypse](https://en.wikipedia.org/wiki/Year_2038_problem)
+before we start fighting over this one. 
+
+Just open an issue when you encounter the bug, I will fix it if I'm available. 
 
 ## Credits
 

@@ -90,6 +90,10 @@ Cable the ethernet connector to your local network, it doesn't have to be direct
 to your computer so long your are in the same local network (layer2 packets can be routed
 within it). 
 
+The ASIC will autonomously send an application packet (ethtype:`0x88b5`) every 1s. 
+
+### Network sniffing tool 
+
 Build the packet sender/receiver app in `tools`: 
 ```
 cd tools
@@ -101,13 +105,59 @@ LAN as the ASIC. Eg: I am connected though my wifi interface:
 ```
 sudo ./packet_receiver wlp3s0
 ```
+Example of the expected output: 
+```
+[pitchu](master) ~/asic/heat_death/tools >sudo ./packet_receiver wlp3s0
+ethernet interface: wlp3s0
+wlp3s0 mac address 60:e9:aa:92:dc:7d
+asic mac address 00:90:cf:00:be:ef
+dst mac ff:ff:ff:ff:ff:ff
+src mac 00:90:cf:00:be:ef
+ethtype 88b5
+counter: 70282575969
+counter debug: 0x000000005d2b0061
+raw pkt: ffffffffffff0090cf00beef88b5feca61002b5d1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+dst mac ff:ff:ff:ff:ff:ff
+src mac 00:90:cf:00:be:ef
+ethtype 88b5
+counter: 70332579937
+counter debug: 0x0000000060260061
+raw pkt: ffffffffffff0090cf00beef88b5feca610026601000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+dst mac ff:ff:ff:ff:ff:ff
+src mac 00:90:cf:00:be:ef
+ethtype 88b5
+counter: 70382583905
+counter debug: 0x0000000063210061
+raw pkt: ffffffffffff0090cf00beef88b5feca610021631000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+dst mac ff:ff:ff:ff:ff:ff
+src mac 00:90:cf:00:be:ef
+ethtype 88b5
+counter: 70432522337
+counter debug: 0x00000000661b0061
+raw pkt: ffffffffffff0090cf00beef88b5feca61001b661000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+```
+### In case of issues 
+
 You can also observe the packets being sent back by sniffing your live traffic
 via tcpdump: 
 ```
 sudo tcpdump -xx -e -v 'ether proto 0x88b5'
 ```
 
-The ASIC will autonomously send an application packet (ethtype:`0x88b5`) every 1s. 
+### In case issues perciste
+
+In case you still see no traffic. 
+
+Directly connect the ethernet cable to your computer and check the ethernet interface exposed
+low level counters to see if you are seeing traffic on your line. 
+
+eg:
+```
+sudo ethtool -S enp2s0
+``` 
 
 ## External hardware
 
@@ -115,3 +165,4 @@ Ethernet 100BASE-T Pmod connector, featuring:
 - LAN8720A PHY 
 - 50MHz oscillator
 
+[Amazone version of the external pmod connector.](https://www.amazon.com/DWEII-Ethernet-Performance-Physical-Transceiver/dp/B0B6G27DC1?crid=2LLJ4JO0M1LNZ&dib=eyJ2IjoiMSJ9.6rjwzVjQxthyb-ipjXaVIkXAXXFR8M7grq4mk5nUjTTCCKxinrJkrDbP7FnWXoMZUP3-pucyQ5X8XinFFvxuuDxwLpLJeR-o4d-efhMnOso53RvGgmSMCqZcZMxbEtkgRDqha9WHcxwOL53E56A1EEr-V0ncFnKGcDBahrQlczIX8AHvK086PzsHTtXp7YOoAzCRpBHZdN9y-MOf1sjakoCR7zdqoZuX6pNq1Xdq4ZM.74lk90oS9tv6_b5bJ83DHWm2zrW0KwVQ0DpqeYAeeTo&dib_tag=se&keywords=lan8720&qid=1783055496&sprefix=lan87%2Caps%2C174&sr=8-1)
