@@ -163,6 +163,12 @@ The MAC will filter out all unicast packets not matching the configured
 destination MAC address. This implies that all broadcast and multicast 
 packets will be forwarded. 
 
+## Coffee-shop Chip family 
+
+This ASIC is part of a larger family of open-source Ethernet connected IP featuring: 
+- [`coffeepot` first generation switch.](https://github.com/Essenceia/ethernet_switch_asic)
+- [`teapot` Ethernet wrapper for building network connected accelerators.](https://github.com/Essenceia/Teapot)
+- [`coldbrew` Ethernet connected beacon for broadcasting an ethernet frame with an uptime count until the heat death of the universe (this repo).](https://github.com/Essenceia/Until_Heat_Death_Do_Us_Part)
 
 ## Credits
 
