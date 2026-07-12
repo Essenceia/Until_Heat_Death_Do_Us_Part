@@ -11,7 +11,7 @@ import random
 import asyncio
 from array import array 
 
-import mac_utils
+import coldbrew_mac_utils
 
 import os
 
@@ -21,11 +21,11 @@ else:
 	TEST_ITER = 2
 
 # send only, used to test config frames where no response is expected
-async def send_frame(dut, rx: mac_utils.eth_frame, phy_idx: str):
-	await mac_utils.phy_stream_frame(dut, rx.raw(), phy_idx)
+async def send_frame(dut, rx: coldbrew_mac_utils.eth_frame, phy_idx: str):
+	await coldbrew_mac_utils.phy_stream_frame(dut, rx.raw(), phy_idx)
 
 async def read_app_frame(dut, phy_idx: str): 
-	tx_frame = await mac_utils.read_tx_frame(dut, phy_idx)
+	tx_frame = await coldbrew_mac_utils.read_tx_frame(dut, phy_idx)
 	gotten = tx_frame.tobytes().hex()
 	exp_len = 8+2*6+2+2+48+4
 	assert len(tx_frame) == exp_len, f"unexpected app frame, got {exp_len}/{len(tx_frame)}"
@@ -37,10 +37,10 @@ async def simple_tx_test_sequence(dut, phy_idx: str = ""):
 		await read_app_frame(dut, phy_idx)
 
 async def update_eth_config_sequence(dut, phy_idx: str = ""):
-	device_mac = mac_utils.DEFAULT_DEVICE_MAC
+	device_mac = coldbrew_mac_utils.DEFAULT_DEVICE_MAC
 	for _ in range(0,TEST_ITER):
 		new_mac = random.randbytes(6)
-		frame, config = mac_utils.simple_config(dst_mac = device_mac, new_mac = new_mac)
+		frame, config = coldbrew_mac_utils.simple_config(dst_mac = device_mac, new_mac = new_mac)
 		await send_frame(dut, frame, phy_idx)
 		dut_mac = int(dut.m_dut.m_coldbrew.mac_addr.value).to_bytes(6, byteorder='big')
 		dut_vid = int(dut.m_dut.m_coldbrew.vid.value).to_bytes(2, byteorder='big')
