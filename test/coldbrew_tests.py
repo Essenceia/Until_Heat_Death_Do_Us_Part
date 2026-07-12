@@ -37,7 +37,8 @@ async def simple_tx_test_sequence(dut, phy_idx: str = ""):
 		await read_app_frame(dut, phy_idx)
 
 async def update_eth_config_sequence(dut, module, phy_idx: str = ""):
-	device_mac = coldbrew_mac_utils.DEFAULT_DEVICE_MAC
+	# get default device mac, set by module parameter
+	device_mac = int(module.DEFAULT_MAC.value).to_bytes(6, byteorder='big')
 	for _ in range(0,TEST_ITER):
 		new_mac = random.randbytes(6)
 		frame, config = coldbrew_mac_utils.simple_config(dst_mac = device_mac, new_mac = new_mac)
