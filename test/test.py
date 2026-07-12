@@ -64,4 +64,5 @@ async def simple_tx_test(dut):
 async def update_eth_config(dut):
 	set_random_seed()
 	await rst(dut)
-	await coldbrew_tests.update_eth_config_sequence(dut)
+	coldbrew_module = dut.m_dut.m_coldbrew
+	await coldbrew_tests.update_eth_config_sequence(dut, coldbrew_module)

@@ -36,16 +36,16 @@ async def simple_tx_test_sequence(dut, phy_idx: str = ""):
 	for _ in range(0,TEST_ITER):
 		await read_app_frame(dut, phy_idx)
 
-async def update_eth_config_sequence(dut, phy_idx: str = ""):
+async def update_eth_config_sequence(dut, module, phy_idx: str = ""):
 	device_mac = coldbrew_mac_utils.DEFAULT_DEVICE_MAC
 	for _ in range(0,TEST_ITER):
 		new_mac = random.randbytes(6)
 		frame, config = coldbrew_mac_utils.simple_config(dst_mac = device_mac, new_mac = new_mac)
 		await send_frame(dut, frame, phy_idx)
-		dut_mac = int(dut.m_dut.m_coldbrew.mac_addr.value).to_bytes(6, byteorder='big')
-		dut_vid = int(dut.m_dut.m_coldbrew.vid.value).to_bytes(2, byteorder='big')
+		dut_mac = int(module.mac_addr.value).to_bytes(6, byteorder='big')
+		dut_vid = int(module.vid.value).to_bytes(2, byteorder='big')
 		assert dut_mac == config.addr, f"missmatch mac config, config sent {config} got addr {dut_mac.hex()}"
-		assert dut_vid == config.vid, f"missmatch vid config, config sent {config} got vid {dut_vid.hex()} raw {dut.m_dut.m_coldbrew.vid.value}"
+		assert dut_vid == config.vid, f"missmatch vid config, config sent {config} got vid {dut_vid.hex()} raw {module.vid.value}"
 		device_mac = new_mac
 	await ClockCycles(dut.clk, 10)
 
