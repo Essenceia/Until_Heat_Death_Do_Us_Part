@@ -104,10 +104,10 @@ async def update_eth_config(dut):
 		new_mac = random.randbytes(6)
 		frame, config = mac_utils.simple_config(dst_mac = device_mac, new_mac = new_mac)
 		await send_frame(dut, frame)
-		dut_mac = int(dut.m_dut.mac_addr.value).to_bytes(6, byteorder='big')
-		dut_vid = int(dut.m_dut.vid.value).to_bytes(2, byteorder='big')
+		dut_mac = int(dut.m_dut.m_coldbrew.mac_addr.value).to_bytes(6, byteorder='big')
+		dut_vid = int(dut.m_dut.m_coldbrew.vid.value).to_bytes(2, byteorder='big')
 		assert dut_mac == config.addr, f"missmatch mac config, config sent {config} got addr {dut_mac.hex()}"
-		assert dut_vid == config.vid, f"missmatch vid config, config sent {config} got vid {dut_vid.hex()} raw {dut.m_dut.vid.value}"
+		assert dut_vid == config.vid, f"missmatch vid config, config sent {config} got vid {dut_vid.hex()} raw {dut.m_dut.m_coldbrew.vid.value}"
 		device_mac = new_mac
 	await ClockCycles(dut.clk, 10)
 
