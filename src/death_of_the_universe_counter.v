@@ -119,7 +119,6 @@ reg  [SEG_CNT_W-1:0] seg_cnt_q;
 
 reg  [BUF_W-1:0] buf_inner_next;
 wire [BUF_W-1:0] buf_next;
-wire [BUF_W-1:0] swap_buf_next;
 reg  [BUF_W-1:0] buf_q;
 reg              buf_cnt_overflow_q;
  
@@ -176,7 +175,6 @@ always @(*) begin
     endcase
 end
 assign buf_next = tx_fsm_q == TX_PENDING ? MAGIC_NUMBER : buf_inner_next; 
-//byteswap #(.W(BUF_W/8)) m_swap_mul_res(.i(buf_next), .o(swap_buf_next));
 
 always @(posedge clk) 
 	if (buf_cnt_overflow_q) buf_q <= buf_next;

@@ -9,7 +9,9 @@ granted to use it to train any model.
 
 /* This RMII assumes full duplex operations, no carrier sense/receiver data valid
    signal will be passed. */
-module rmii(
+module rmii#(
+	parameter HAS_TX_PHASE = 1
+)(
 	input wire clk,
 	input wire rst_n, 
 
@@ -38,6 +40,8 @@ always @(posedge clk) begin
 	mac_tx_q   <= mac_tx_i;
 end
 
+generate 
+if (HAS_TX_PHASE == 1) begin: g_tx_phase
 tx_tt_buffer m_tx_delay(
 	.ref_clk(clk),
 
@@ -49,6 +53,20 @@ tx_tt_buffer m_tx_delay(
 	.tx_v_o(phy_tx_v_o),
 	.tx_o(phy_tx_o)
 ); 
+end else begin : g_no_tx_phase
+reg       phy_tx_v_q;
+reg [1:0] phy_tx_q;
+
+always @(posedge clk) begin
+	phy_tx_v_q <= mac_tx_v_q;
+	phy_tx_q   <= mac_tx_q;
+end
+
+assign phy_tx_v_o = phy_tx_v_q;
+assign phy_tx_o   = phy_tx_q;
+
+end
+endgenerate // tx phase
 
 // RX - pass though, flop for timing
 wire      mac_rx_v_next;
