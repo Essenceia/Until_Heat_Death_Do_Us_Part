@@ -77,22 +77,21 @@ class eth_frame:
 		return r
 
 # lsbit first MSByte first
-
-async def phy_stream_frame(dut, raw):
+async def phy_stream_frame(dut, raw, phy_idx: str):
 	cocotb.log.debug(f"raw frame {raw.hex()}")
 	preamble = random.randint(1,10)
-	dut.phy_rx_err.value = 0
+	dut[f"phy_rx{phy_idx}_err"].value = 0
 	for _ in range(1, preamble):
-		dut.phy_rx_v.value = 1
-		dut.phy_rx.value = 0
+		dut[f"phy_rx{phy_idx}_v"].value = 1
+		dut[f"phy_rx{phy_idx}"].value = 0
 		await ClockCycles(dut.clk,1)
 	for x in raw:
 		cocotb.log.debug(f"x {hex(x)}") 
 		for _ in range(0,4):
-			dut.phy_rx_v.value = 1
+			dut[f"phy_rx{phy_idx}_v"].value = 1
 			dut.phy_rx.value = x & 0x3
 			await ClockCycles(dut.clk,1)
-			cocotb.log.debug(f"{dut.phy_rx.value}")
+			cocotb.log.debug(f"{dut[f"phy_rx{phy_idx}"].value}")
 			x = x >> 2
 	# IPG
 	ipg = random.randint(1,10)
@@ -122,12 +121,12 @@ def bitpair_to_bytes(buff):
 	assert(i % 4 == 0)
 	return frame
 
-async def read_tx_frame(dut) -> bytes:
+async def read_tx_frame(dut, phy_idx: str) -> bytes:
 	buff = array('B') 
-	while( dut.phy_tx_v.value != 1):
+	while( dut[f"phy_tx{phy_idx}_v"].value != 1):
 		await ClockCycles(dut.clk, 1)
-	while (dut.phy_tx_v.value == 1):
-		buff.append(dut.phy_tx.value)
+	while (dut[f"phy_tx{phy_idx}_v"].value == 1):
+		buff.append(dut[f"phy_tx{phy_idx}"].value)
 		await ClockCycles(dut.clk, 1)
 	assert len(buff) >= (64+8)*4, f"invalid frame length, got len {len(buff)} expecting at least {(64+8)*4}"
 	return bitpair_to_bytes(buff)
