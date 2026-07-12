@@ -13,6 +13,7 @@ from array import array
 
 import coldbrew_test
 
+import time
 import os
 
 if "GATES" in os.environ:
@@ -22,6 +23,14 @@ else:
 
 CLK_UNIT="ns"
 CLK_PERIOD=20
+
+def set_random_seed():
+	if "SEED" in os.environ:
+		seed = int(os.environ["SEED"].lower().strip())
+	else:
+		seed = time.time_ns()
+	cocotb.log.info(f"random seed {seed}")
+	random.seed(seed)
 
 def start_clk(dut):
 	clock = Clock(dut.clk, CLK_PERIOD, CLK_UNIT)
@@ -47,12 +56,12 @@ async def rst(dut, ena=1 ):
 # Simple test 
 @cocotb.test(skip=True if GATES == "yes" else False)
 async def simple_tx_test(dut):
-	random.seed(0)
+	set_random_seed()
 	await rst(dut) 
 	await coldbrew_test.simple_tx_test_sequence(dut)	
 
 @cocotb.test(skip=True if GATES == "yes" else False)
 async def update_eth_config(dut):
-	random.seed(0)
+	set_random_seed()
 	await rst(dut)
 	await coldbrew_test.update_eth_config_sequence(dut)
