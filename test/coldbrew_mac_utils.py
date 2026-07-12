@@ -89,16 +89,16 @@ async def phy_stream_frame(dut, raw, phy_idx: str):
 		cocotb.log.debug(f"x {hex(x)}") 
 		for _ in range(0,4):
 			dut[f"phy_rx{phy_idx}_v"].value = 1
-			dut.phy_rx.value = x & 0x3
+			dut[f"phy_rx{phy_idx}"].value = x & 0x3
 			await ClockCycles(dut.clk,1)
 			cocotb.log.debug(f"{dut[f"phy_rx{phy_idx}"].value}")
 			x = x >> 2
 	# IPG
 	ipg = random.randint(1,10)
 	for _ in range(0, ipg):
-		dut.phy_rx_v.value = 0
-		dut.phy_rx_err.value = "X"
-		dut.phy_rx.value = "X"*2
+		dut[f"phy_rx{phy_idx}_v"].value = 0
+		dut[f"phy_rx{phy_idx}_err"].value = "X"
+		dut[f"phy_rx{phy_idx}"].value = "X"*2
 		await ClockCycles(dut.clk,1)
 
 # convert from byte array where data is stored in the 2 lower bits 
