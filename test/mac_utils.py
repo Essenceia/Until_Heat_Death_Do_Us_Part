@@ -12,7 +12,6 @@ from array import array
 from typing import NamedTuple, Optional
 
 import crc_utils 
-import app_utils
 import conf_utils
 
 APP_ETHTYPE = b"\x88\xB5"
@@ -132,43 +131,6 @@ async def read_tx_frame(dut) -> bytes:
 		await ClockCycles(dut.clk, 1)
 	assert len(buff) >= (64+8)*4, f"invalid frame length, got len {len(buff)} expecting at least {(64+8)*4}"
 	return bitpair_to_bytes(buff)
-
-async def check_no_tx_frame(dut, timeout:int = 150) -> None:
-	for _ in range(0, timeout):
-		if (dut.phy_tx_v.value == 1):
-			cocotb.log.error("Error, unexpected tx response")
-			assert(0)
-		await ClockCycles(dut.clk, 1)
-		
-# { expect result boolean, result }
-def expected_response(req: eth_frame, device_mac : bytes(6) = DEFAULT_DEVICE_MAC) -> tuple[bool, eth_frame]:
-	tx_sent = False
-	if (req.header.dst == device_mac) and(req.header.ethtype == APP_ETHTYPE): 
-		tx_sent = True
-	if req.header.vlan_tag is not None: 	
-		if (req.header.vlan_tag.tci & VID_MASK) != DEFAULT_VID:
-			tx_sent = False
-	resp = eth_frame(dst=req.header.src, src=req.header.dst)
-	resp.set_payload(app_utils.layer3_app(req.body), APP_ETHTYPE)
-	return tx_sent, resp
-		
-def simple_frame() -> eth_frame:
-	# group dst address
-	frame = eth_frame(dst=DEFAULT_DEVICE_MAC, src=b"\x00\xF0\x00\xFF\x00\xFF")
-	frame.set_payload(payload = app_utils.random_request_payload() , ethtype = APP_ETHTYPE)
-	return frame
-
-def test_filtered_packets(dst_mac: bytes(6) = DEFAULT_DEVICE_MAC ) -> eth_frame:
-	accepted_pkt = simple_frame()
-	src_mac = random.randbytes(6)
-	ethtype = APP_ETHTYPE
-	if (random.randint(0,100) < 10):
-		dst_mac = random.randbytes(6)
-	if (random.randint(0,100) < 10):
-		ethtype = random.randbytes(2)
-	frame = eth_frame(dst = dst_mac, src = src_mac)
-	frame.set_payload(payload = app_utils.random_request_payload() , ethtype = APP_ETHTYPE)
-	return frame
 
 def simple_config(dst_mac : bytes(6) = DEFAULT_DEVICE_MAC, new_mac: bytes(6) = random.randbytes(6)) -> eth_frame:
 	frame = eth_frame(dst=dst_mac, src=b"\x00\xF0\x00\xFF\x00\xFF")

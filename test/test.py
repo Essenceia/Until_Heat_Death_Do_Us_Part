@@ -65,28 +65,6 @@ async def read_app_frame(dut):
 	assert len(tx_frame) == exp_len, f"unexpected app frame, got {exp_len}/{len(tx_frame)}"
 	cocotb.log.info(f"tx {gotten}")
 
-
-async def send_and_check_frames(dut, rx: mac_utils.eth_frame, device_mac = mac_utils.DEFAULT_DEVICE_MAC):
-	tx_sent, tx = mac_utils.expected_response(rx, device_mac)
-	if tx_sent: 
-		read_tx_thread = cocotb.start_soon(mac_utils.read_tx_frame(dut))
-	else:
-		read_tx_thread = cocotb.start_soon(mac_utils.check_no_tx_frame(dut))
-	await mac_utils.phy_stream_frame(dut,rx.raw())
-	tx_frame = await read_tx_thread
-	if tx_sent:
-		tx_raw = tx.raw(is_rmii_tx = True)
-		expected = tx_raw.hex()
-		gotten = tx_frame.tobytes().hex()
-		cocotb.log.info(f"tx {gotten}")
-		if (expected != gotten): 
-			cocotb.log.error(f"Error, missmatch between expected and gotten tx ethernet frame\nexp {expected}\ngot {gotten}")
-			debug_string = 4*" "
-			for (e, g) in zip(expected, gotten):
-				debug_string += "^" if (e != g) else " "
-			cocotb.log.error(debug_string)
-			assert(0)
-
 # Simple test 
 @cocotb.test(skip=True if GATES == "yes" else False)
 async def simple_tx_test(dut):
