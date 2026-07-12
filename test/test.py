@@ -11,27 +11,17 @@ import random
 import asyncio
 from array import array 
 
-import mac_utils
+import coldbrew_test
 
 import os
+
 if "GATES" in os.environ:
 	GATES = os.environ["GATES"].lower().strip()
 else:
 	GATES = ""
 
-if "TEST_ITER" in os.environ:
-	TEST_ITER = int(os.environ["TEST_ITER"].lower().strip())
-else:
-	TEST_ITER = 2
-
-
 CLK_UNIT="ns"
 CLK_PERIOD=20
-TCK_UNIT=CLK_UNIT 
-TCK_PERIOD=77
-CLK_TIMEOUT_PERIOD=(CLK_PERIOD*1000)
-
-SC_CLK_DELAY=2
 
 def start_clk(dut):
 	clock = Clock(dut.clk, CLK_PERIOD, CLK_UNIT)
@@ -54,38 +44,15 @@ async def rst(dut, ena=1 ):
 	dut.ena.value = ena
 	await ClockCycles(dut.clk, 20)
 
-# send only, used to test config frames where no response is expected
-async def send_frame(dut, rx: mac_utils.eth_frame):
-	await mac_utils.phy_stream_frame(dut, rx.raw())
-
-async def read_app_frame(dut): 
-	tx_frame = await mac_utils.read_tx_frame(dut)
-	gotten = tx_frame.tobytes().hex()
-	exp_len = 8+2*6+2+2+48+4
-	assert len(tx_frame) == exp_len, f"unexpected app frame, got {exp_len}/{len(tx_frame)}"
-	cocotb.log.info(f"tx {gotten}")
-
 # Simple test 
 @cocotb.test(skip=True if GATES == "yes" else False)
 async def simple_tx_test(dut):
 	random.seed(0)
 	await rst(dut) 
-	for _ in range(0,TEST_ITER):
-		await read_app_frame(dut)
+	await coldbrew_test.simple_tx_test_sequence(dut)	
 
 @cocotb.test(skip=True if GATES == "yes" else False)
 async def update_eth_config(dut):
 	random.seed(0)
 	await rst(dut)
-	device_mac = mac_utils.DEFAULT_DEVICE_MAC
-	for _ in range(0,TEST_ITER):
-		new_mac = random.randbytes(6)
-		frame, config = mac_utils.simple_config(dst_mac = device_mac, new_mac = new_mac)
-		await send_frame(dut, frame)
-		dut_mac = int(dut.m_dut.m_coldbrew.mac_addr.value).to_bytes(6, byteorder='big')
-		dut_vid = int(dut.m_dut.m_coldbrew.vid.value).to_bytes(2, byteorder='big')
-		assert dut_mac == config.addr, f"missmatch mac config, config sent {config} got addr {dut_mac.hex()}"
-		assert dut_vid == config.vid, f"missmatch vid config, config sent {config} got vid {dut_vid.hex()} raw {dut.m_dut.m_coldbrew.vid.value}"
-		device_mac = new_mac
-	await ClockCycles(dut.clk, 10)
-
+	await coldbrew_test.update_eth_config_sequence(dut)
