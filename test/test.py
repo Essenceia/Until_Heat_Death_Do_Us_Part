@@ -11,7 +11,7 @@ import random
 import asyncio
 from array import array 
 
-import coldbrew_test
+import coldbrew_tests
 
 import time
 import os
@@ -58,10 +58,10 @@ async def rst(dut, ena=1 ):
 async def simple_tx_test(dut):
 	set_random_seed()
 	await rst(dut) 
-	await coldbrew_test.simple_tx_test_sequence(dut)	
+	await coldbrew_tests.simple_tx_test_sequence(dut)	
 
 @cocotb.test(skip=True if GATES == "yes" else False)
 async def update_eth_config(dut):
 	set_random_seed()
 	await rst(dut)
-	await coldbrew_test.update_eth_config_sequence(dut)
+	await coldbrew_tests.update_eth_config_sequence(dut)
