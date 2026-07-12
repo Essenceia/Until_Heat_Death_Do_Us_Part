@@ -17,11 +17,10 @@ set tsu 4
 # input hold time after rising edge of refclk
 set tihold -2.0
 
-set_output_delay -clock $::env(OUTPUT_CLOCK_0) -max ${tsu} $::env(PHY_TX_PINS)
-set_output_delay -clock $::env(OUTPUT_CLOCK_0) -min ${tihold} $::env(PHY_TX_PINS)
+set_output_delay -clock $::env(OUTPUT_CLOCK_TX) -max ${tsu} $::env(PHY_TX_PINS)
+set_output_delay -clock $::env(OUTPUT_CLOCK_TX) -min ${tihold} $::env(PHY_TX_PINS)
 
-set_output_delay -clock $::env(OUTPUT_CLOCK_1) -max ${tsu} $::env(PHY_TX_PINS) -add_delay
-set_output_delay -clock $::env(OUTPUT_CLOCK_1) -min ${tihold} $::env(PHY_TX_PINS) -add_delay
+puts "\[INFO\]\[RMII BUS\] RX setup ${toval} hold ${tohold} TX setup ${tsu} hold ${tihold}" 
 
 
 
