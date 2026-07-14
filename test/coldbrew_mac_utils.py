@@ -91,7 +91,6 @@ async def phy_stream_frame(dut, raw, phy_idx: str):
 			dut[f"phy_rx{phy_idx}_v"].value = 1
 			dut[f"phy_rx{phy_idx}"].value = x & 0x3
 			await ClockCycles(dut.clk,1)
-			cocotb.log.debug(f"{dut[f"phy_rx{phy_idx}"].value}")
 			x = x >> 2
 	# IPG
 	ipg = random.randint(1,10)
