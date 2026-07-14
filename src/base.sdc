@@ -40,6 +40,7 @@ set_propagated_clock [all_clocks]
 
 report_clock_properties [all_clocks]
 
+set ::env(INPUT_PHY_CLK) [get_clocks $::env(CLOCK_PORT)] 
 set ::env(PHY_RX_PINS) {ui_in[0] ui_in[1] ui_in[2] ui_in[3]}
 set ::env(PHY_TX_PINS) {uo_out[0] uo_out[1] uo_out[2]}
 
