@@ -78,7 +78,7 @@ class eth_frame:
 
 # lsbit first MSByte first
 async def phy_stream_frame(dut, raw, phy_idx: str):
-	cocotb.log.debug(f"raw frame {raw.hex()}")
+	cocotb.log.info(f"RX{phy_idx} raw frame {raw.hex()}")
 	preamble = random.randint(1,10)
 	dut[f"phy_rx{phy_idx}_err"].value = 0
 	for _ in range(1, preamble):
