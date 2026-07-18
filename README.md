@@ -7,9 +7,19 @@ with the current counters value, not that anyone is going to be listening for lo
 Assuming the universe dies in approximately $10^{100}$ years. If you are patient enough to wait until then there is 
 a hidden easter egg when we eventually overflow.  
 
+Quickstart can be found [in the documentation](/docs/info.md).
+
+## Tapeouts
+
+This design has been tapedout twice on Global foundries 180nm. 
+
+First as part of the Tiny Tapeout experimental `gf0p3` shuttle chip :  
 ![floorplan](/docs/floorplan_lazy.png) 
 
-Quickstart can be found [in the documentation](/docs/info.md).
+Secondly as part of the full [Expresso chip](https://github.com/Essenceia/Expresso_ASIC_Chip) a fully open source Ethernet focused chip,
+sponsored by [wafer.space](https://wafer.space/) as part of there second multi-wafer program run.
+
+![expresso](/docs/expresso_chip.png)
 
 # Doomsday counter 
 
