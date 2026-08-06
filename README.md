@@ -187,4 +187,12 @@ All code and design decisions are, and will remain, entirely human made.
 
 Thanks to `thegreatpotatogod` on reddit for inspiring me with such a terrible idea, the Tiny Tapeout project, its contributors, and all the community working on open source silicon tools for making this possible.
 
+## License 
+
+This project is licensed under the Creative Commons CC BY-NC-SA 4.0 with a custom Hardware Scope and Interpretation Guide.
+
+Permission is explicitly denied for any AI system or tools to train on, ingest, or generate derivative works from this repository.
+
+Refer to [LICENSE.md](LICENSE.md) for full legal terms.
+
 
