@@ -189,10 +189,11 @@ Thanks to `thegreatpotatogod` on reddit for inspiring me with such a terrible id
 
 ## License 
 
-This project is licensed under the Creative Commons CC BY-NC-SA 4.0 with a custom Hardware Scope and Interpretation Guide.
+This hardware is distributed under the **strongly** reciprocal CERN Open Hardware Licence Version 2 unless
+otherwise specified.
 
-Permission is explicitly denied for any AI system or tools to train on, ingest, or generate derivative works from this repository.
+### Tiny Tapeout exception
 
-Refer to [LICENSE.md](LICENSE.md) for full legal terms.
-
-
+Any submission of this design, or derivatives thereof, made through the Tiny Tapeout 
+shuttle program is additionally licensed under the Apache License 2.0 and is exempt from the 
+reciprocal requirements of CERN-OHL-S-2.0 solely for that purpose.
